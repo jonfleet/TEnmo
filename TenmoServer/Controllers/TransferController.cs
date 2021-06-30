@@ -9,13 +9,19 @@ using TenmoServer.Models;
 
 namespace TenmoServer.Controllers
 {
-    [Route("{user}/[controller]")]
+    [Route("[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class TransferController : ControllerBase
     {
-        private readonly IUserDAO UserDao;
-        private readonly ReturnUser User;
+        private readonly IUserDAO userDao;
+        private readonly ReturnUser user;
+
+        public TransferController(IUserDAO _userDao, ReturnUser _user)
+        {
+            userDao = _userDao;
+            user = _user;
+        }
 
         [HttpGet]
         public ActionResult<List<Transfer>> GetTransfers()
@@ -23,7 +29,7 @@ namespace TenmoServer.Controllers
             //Get all Send and Receive Transfers for the user
             try
             {
-                List<Transfer> transfers = UserDao.GetTransfers(User);
+                List<Transfer> transfers = userDao.GetTransfers(user);
                 return Ok(transfers);
             }
             catch (Exception)
@@ -38,7 +44,7 @@ namespace TenmoServer.Controllers
             // Get a single transfer based on Id
             try
             {
-                Transfer singleTransfer = UserDao.GetTransferById(transferId, User);
+                Transfer singleTransfer = userDao.GetTransferById(transferId, user);
                 return Ok(singleTransfer);
             }
             catch (Exception)
@@ -49,12 +55,12 @@ namespace TenmoServer.Controllers
 
 
         [HttpPost("send/{toUserId}")]
-        public ActionResult<Payment> SendPayment(Payment payment)
+        public ActionResult<Transfer> SendPayment(Transfer payment)
         {
             // Sends payment to the specified user {toUserId}
             try
             {
-                Payment completedPayment = UserDao.SendPayment(payment);
+                Transfer completedPayment = userDao.SendPayment(payment);
                 return Ok(completedPayment);
             }
             catch (Exception)

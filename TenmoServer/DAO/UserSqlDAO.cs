@@ -115,6 +115,16 @@ namespace TenmoServer.DAO
         public List<Transfer> GetTransfers(ReturnUser user)
         {
             //List<Transaction> trans = new List<Transaction>();
+
+            try
+            {
+
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
             return null;
         }
 
@@ -123,7 +133,7 @@ namespace TenmoServer.DAO
             return null;
         }
 
-        public Payment SendPayment(Payment payment)
+        public Transfer SendPayment(Transfer payment)
         {
             return null;
         }
