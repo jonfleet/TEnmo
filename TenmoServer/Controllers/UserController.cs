@@ -14,6 +14,13 @@ namespace TenmoServer.Controllers
     {
         private readonly IUserDAO userDAO;
         private readonly ReturnUser user;
+        
+        public UserController(IUserDAO _userDAO, ReturnUser _user)
+        {
+            userDAO = _userDAO;
+            user = _user;
+        }
+        
         [HttpGet("balance")]
         public ActionResult<Balance> GetTheBalance() 
         {
