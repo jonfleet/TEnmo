@@ -111,6 +111,49 @@ namespace TenmoServer.DAO
             return GetUser(username);
         }
 
+
+        public List<Transfer> GetTransfers(ReturnUser user)
+        {
+            //List<Transaction> trans = new List<Transaction>();
+            return null;
+        }
+
+        public Transfer GetTransferById(int id, ReturnUser user)
+        {
+            return null;
+        }
+
+        public Payment SendPayment(Payment payment)
+        {
+            return null;
+        }
+
+        public Balance GetBalance(ReturnUser user)
+        {
+            Balance userBalance = new Balance();
+
+            try
+            {
+                using (SqlConnection conny = new SqlConnection(connectionString))
+                {
+                    SqlCommand cmd = new SqlCommand("select top 1 account_id, user_id, balance from accounts where user_id = @user.UserId;", conny);
+                    cmd.Parameters.AddWithValue("@user.UserId", user.UserId);
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    if (reader.Read())
+                    {
+                        userBalance.AccountId = Convert.ToInt32(reader["account_id"]);
+                        userBalance.UserId = Convert.ToInt32(reader["user_id"]);
+                        userBalance.PrimaryBalance = Convert.ToDecimal(reader["balance"]);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+            return userBalance;
+        }
+
         private User GetUserFromReader(SqlDataReader reader)
         {
             User u = new User()
@@ -123,5 +166,6 @@ namespace TenmoServer.DAO
 
             return u;
         }
+        
     }
 }
