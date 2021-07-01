@@ -114,28 +114,104 @@ namespace TenmoServer.DAO
 
         public List<Transfer> GetTransfers(string username)
         {
-            //List<Transaction> trans = new List<Transaction>();
+            List<Transfer> returnTransactions = new List<Transfer>();
 
             try
             {
-
+                using (SqlConnection conny = new SqlConnection(connectionString))
+                {
+                    conny.Open();
+                    SqlCommand cmd = new SqlCommand("select * from transfers as t " +
+                        "join accounts as a " +
+                        "on a.account_id = t.account_from " +
+                        "join users as u " +
+                        "on u.user_id = a.user_id " +
+                        "where " +
+                        "(t.account_from = (select user_id from users where username = @username)) " +
+                        "or(t.account_to = (select user_id from users where username = @username))", conny);
+                    cmd.Parameters.AddWithValue("@username", username);
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    
+                    if (reader.HasRows)
+                    {
+                        while (reader.Read())
+                        {
+                            Transfer t = GetTransferFromReader(reader);
+                            returnTransactions.Add(t);
+                        }
+                    }
+                }
             }
-            catch (Exception)
+            catch (Exception e)
             {
 
-                throw;
+                throw e;
             }
-            return null;
+            return returnTransactions;
         }
 
-        public Transfer GetTransferById(int id, string user)
+        public Transfer GetTransferById(int transferId, string username)
         {
-            return null;
+            Transfer transfer = null;
+            try
+            {
+                using (SqlConnection conny = new SqlConnection(connectionString))
+                {
+                    conny.Open();
+                    SqlCommand cmd = new SqlCommand("select * from transfers as t " +
+                        "join accounts as a " +
+                        "on a.account_id = t.account_from " +
+                        "join users as u " +
+                        "on u.user_id = a.user_id " +
+                        "where (t.transfer_id = @transferId) and" +
+                        "((t.account_from = (select user_id from users where username = @username))" +
+                        "or(t.account_to = (select user_id from users where username = @username)))", conny);
+
+                    cmd.Parameters.AddWithValue( "@transferId", transferId);
+                    cmd.Parameters.AddWithValue("@username", username);
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    if(reader.Read())
+                    {
+                        transfer = GetTransferFromReader(reader);
+                    }
+                }
+
+            }
+            catch (Exception e)
+            {
+
+                throw e;
+            }
+            return transfer;
         }
 
         public Transfer SendPayment(Transfer payment)
         {
-            return null;
+            Transfer sentPayment = null;
+            try
+            {
+                using (SqlConnection conny = new SqlConnection(connectionString))
+                {
+                    conny.Open();
+                    SqlCommand cmd = new SqlCommand("insert here brother", conny);
+                    cmd.Parameters.AddWithValue("", payment.FromUserId);
+                    cmd.Parameters.AddWithValue("", payment.ToUserId);
+                    cmd.Parameters.AddWithValue("", payment.Amount);
+
+                    payment.TransferId = Convert.ToInt32(cmd.ExecuteScalar());
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    if(reader.HasRows)
+                    {
+                        sentPayment = GetTransferFromReader(reader);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+
+                throw e;
+            }
+            return sentPayment;
         }
 
         public Balance GetBalance(string username)
@@ -176,6 +252,19 @@ namespace TenmoServer.DAO
             };
 
             return u;
+        }
+        private Transfer GetTransferFromReader(SqlDataReader reader)
+        {
+            Transfer t = new Transfer()
+            {
+                TransferId = Convert.ToInt32(reader["transfer_id"]),
+                TransferTypeId = Convert.ToInt32(reader["transfer_type_id"]),
+                TransferStatusId = Convert.ToInt32(reader["transfer_status_id"]),
+                FromUserId = Convert.ToInt32(reader["account_from"]),
+                ToUserId = Convert.ToInt32(reader["account_to"]),
+                Amount = Convert.ToDecimal(reader["amount"]),
+            };
+            return t;
         }
         
     }
