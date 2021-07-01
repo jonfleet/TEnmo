@@ -55,12 +55,12 @@ namespace TenmoServer.Controllers
 
 
         [HttpPost("send/{toUserId}")]
-        public ActionResult<Transfer> SendPayment(Transfer payment)
+        public ActionResult<Transfer> SendPayment(Transfer transfer = null)
         {
             // Sends payment to the specified user {toUserId}
             try
             {
-                Transfer completedPayment = userDao.SendPayment(payment);
+                Transfer completedPayment = userDao.CreateTransfer(transfer);
                 return Ok(completedPayment);
             }
             catch (Exception)

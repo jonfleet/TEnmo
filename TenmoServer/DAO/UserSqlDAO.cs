@@ -185,7 +185,7 @@ namespace TenmoServer.DAO
             return transfer;
         }
 
-        public Transfer SendPayment(Transfer payment)
+        public Transfer CreateTransfer(Transfer transfer)
         {
             Transfer sentPayment = null;
             try
@@ -193,12 +193,23 @@ namespace TenmoServer.DAO
                 using (SqlConnection conny = new SqlConnection(connectionString))
                 {
                     conny.Open();
-                    SqlCommand cmd = new SqlCommand("insert here brother", conny);
-                    cmd.Parameters.AddWithValue("", payment.FromUserId);
-                    cmd.Parameters.AddWithValue("", payment.ToUserId);
-                    cmd.Parameters.AddWithValue("", payment.Amount);
+                    SqlCommand cmd = new SqlCommand("Insert into transfers(transfer_type_id, transfer_status_id, account_from, account_to, amount) " +
+                        "OUTPUT INSERTED.transfer_id " +
+                        "values " +
+                        "(" +
+                        "   (select transfer_type_id from transfer_types where transfer_type_desc = @transferType), " +
+                        "   (select transfer_status_id from transfer_statuses where transfer_status_desc = 'Approved'), " +
+                        "   @fromUser, " +
+                        "   @toUser, " +
+                        "   @amount" +
+                        ");", conny);
+                    cmd.Parameters.AddWithValue("@transferType", transfer.TransferTypeId);
+                    cmd.Parameters.AddWithValue("@transferStatus", transfer.TransferStatusId);
+                    cmd.Parameters.AddWithValue("@fromUser", transfer.FromUserId);
+                    cmd.Parameters.AddWithValue("@toUser", transfer.ToUserId);
+                    cmd.Parameters.AddWithValue("@amount", transfer.Amount);
 
-                    payment.TransferId = Convert.ToInt32(cmd.ExecuteScalar());
+                    string temp = cmd.ExecuteScalar().ToString();
                     SqlDataReader reader = cmd.ExecuteReader();
                     if(reader.HasRows)
                     {
