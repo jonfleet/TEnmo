@@ -8,7 +8,7 @@ namespace TenmoServer.DAO
         User GetUser(string username);
         User AddUser(string username, string password);
         List<User> GetUsers();
-        Balance GetBalance(int userId);
+        Balance GetBalance(string username);
        
         List<Transfer> GetTransfers(string username);
         Transfer GetTransferById(int id, string username);

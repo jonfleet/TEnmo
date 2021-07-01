@@ -1,6 +1,7 @@
 ﻿using RestSharp;
 using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using TenmoClient.Data;
 
 namespace TenmoClient
@@ -76,17 +77,25 @@ namespace TenmoClient
         }
         public Balance ReturnBalance()
         {
-            RestRequest request = new RestRequest(API_BASE_URL + "User/balance");
+            Balance balance = null;
+            RestRequest request = new RestRequest(API_BASE_URL + "user/balance");
             request.AddJsonBody(user);
             IRestResponse<Balance> response = client.Get<Balance>(request);
 
             if (response.ResponseStatus != ResponseStatus.Completed)
             {
-                Console.WriteLine("An error occurred communicating with the server");
+                throw new HttpRequestException("An error occurred communication with the server");
             }
-            Console.WriteLine();
-            Console.WriteLine($"Your Balance is currently {response.Data.PrimaryBalance}");
-            return response.Data;
+            else if (!response.IsSuccessful)
+            {
+                throw new HttpRequestException("Response was unsuccessful: " + (int)response.StatusCode + " " + response.StatusDescription);
+            }
+            else
+            {
+                Console.WriteLine();
+                Console.WriteLine($"Your Balance is currently {response.Data.PrimaryBalance}");
+                return response.Data;
+            }
         }
     }
 }

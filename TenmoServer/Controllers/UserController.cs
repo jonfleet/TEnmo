@@ -27,7 +27,7 @@ namespace TenmoServer.Controllers
 
             try
             {
-                Balance balance = userDAO.GetBalance(username.Length);
+                Balance balance = userDAO.GetBalance(username);
                 if(balance.UserId != 0)
                 {
                 return Ok(balance);
