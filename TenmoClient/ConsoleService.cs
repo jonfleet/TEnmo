@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RestSharp;
+using System;
 using System.Collections.Generic;
 using TenmoClient.Data;
 
@@ -6,6 +7,9 @@ namespace TenmoClient
 {
     public class ConsoleService
     {
+        private readonly static string API_BASE_URL = "https://localhost:44315/";
+        private readonly RestClient client = new RestClient();
+        private readonly API_User user;
         /// <summary>
         /// Prompts for transfer ID to view, approve, or reject
         /// </summary>
@@ -69,6 +73,20 @@ namespace TenmoClient
             while (key.Key != ConsoleKey.Enter);
             Console.WriteLine("");
             return pass;
+        }
+        public Balance ReturnBalance()
+        {
+            RestRequest request = new RestRequest(API_BASE_URL + "User/balance");
+            request.AddJsonBody(user);
+            IRestResponse<Balance> response = client.Get<Balance>(request);
+
+            if (response.ResponseStatus != ResponseStatus.Completed)
+            {
+                Console.WriteLine("An error occurred communicating with the server");
+            }
+            Console.WriteLine();
+            Console.WriteLine($"Your Balance is currently {response.Data.PrimaryBalance}");
+            return response.Data;
         }
     }
 }

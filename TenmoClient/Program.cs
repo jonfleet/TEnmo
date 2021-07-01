@@ -86,7 +86,7 @@ namespace TenmoClient
                 }
                 else if (menuSelection == 1)
                 {
-
+                    consoleService.ReturnBalance();
                 }
                 else if (menuSelection == 2)
                 {
