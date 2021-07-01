@@ -13,6 +13,6 @@ namespace TenmoServer.DAO
         List<Transfer> GetTransfers(string username);
         Transfer GetTransferById(int id, string username);
 
-        Transfer SendPayment(Transfer payment);
+        Transfer CreateTransfer(Transfer payment);
     }
 }
