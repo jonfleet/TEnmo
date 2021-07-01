@@ -26,7 +26,7 @@ namespace TenmoServer.Controllers
         [HttpGet]
         public ActionResult<List<Transfer>> GetTransfers()
         {
-            //Get all Send and Receive Transfers for the user
+            
             try
             {
                 List<Transfer> transfers = userDao.GetTransfers(user);
