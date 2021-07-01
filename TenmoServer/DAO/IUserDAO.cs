@@ -8,10 +8,10 @@ namespace TenmoServer.DAO
         User GetUser(string username);
         User AddUser(string username, string password);
         List<User> GetUsers();
-        Balance GetBalance(ReturnUser user);
+        Balance GetBalance(int userId);
        
-        List<Transfer> GetTransfers(ReturnUser user);
-        Transfer GetTransferById(int id, ReturnUser user);
+        List<Transfer> GetTransfers(string username);
+        Transfer GetTransferById(int id, string username);
 
         Transfer SendPayment(Transfer payment);
     }

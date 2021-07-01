@@ -112,7 +112,7 @@ namespace TenmoServer.DAO
         }
 
 
-        public List<Transfer> GetTransfers(ReturnUser user)
+        public List<Transfer> GetTransfers(string username)
         {
             //List<Transaction> trans = new List<Transaction>();
 
@@ -128,7 +128,7 @@ namespace TenmoServer.DAO
             return null;
         }
 
-        public Transfer GetTransferById(int id, ReturnUser user)
+        public Transfer GetTransferById(int id, string user)
         {
             return null;
         }
@@ -138,7 +138,7 @@ namespace TenmoServer.DAO
             return null;
         }
 
-        public Balance GetBalance(ReturnUser user)
+        public Balance GetBalance(int userId)
         {
             Balance userBalance = new Balance();
 
@@ -146,8 +146,9 @@ namespace TenmoServer.DAO
             {
                 using (SqlConnection conny = new SqlConnection(connectionString))
                 {
-                    SqlCommand cmd = new SqlCommand("select top 1 account_id, user_id, balance from accounts where user_id = @user.UserId;", conny);
-                    cmd.Parameters.AddWithValue("@user.UserId", user.UserId);
+                    conny.Open();
+                    SqlCommand cmd = new SqlCommand("select top 1 account_id, user_id, balance from accounts where user_id = @user;", conny);
+                    cmd.Parameters.AddWithValue("@user", userId);
                     SqlDataReader reader = cmd.ExecuteReader();
                     if (reader.Read())
                     {
