@@ -13,12 +13,10 @@ namespace TenmoServer.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserDAO userDAO;
-        private readonly ReturnUser user;
         
-        public UserController(IUserDAO _userDAO, ReturnUser _user)
+        public UserController(IUserDAO _userDAO)
         {
             userDAO = _userDAO;
-            user = _user;
         }
         
         [HttpGet("balance")]
@@ -28,7 +26,7 @@ namespace TenmoServer.Controllers
 
             try
             {
-                Balance balance = userDAO.GetBalance(username.Length);
+                Balance balance = userDAO.GetBalance(username);
                 if(balance.UserId != 0)
                 {
                 return Ok(balance);
