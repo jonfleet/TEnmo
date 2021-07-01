@@ -22,12 +22,18 @@ namespace TenmoServer.Controllers
         }
         
         [HttpGet("balance")]
-        public ActionResult<Balance> GetTheBalance() 
+        public ActionResult<Balance> GetTheBalance()
         {
+            string username = User.Identity.Name;
+
             try
             {
-                Balance balance = userDAO.GetBalance(user);
+                Balance balance = userDAO.GetBalance(username.Length);
+                if(balance.UserId != 0)
+                {
                 return Ok(balance);
+                }
+                return BadRequest("The database did not communicate correctly");
             }
             catch (Exception)
             {

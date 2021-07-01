@@ -15,21 +15,19 @@ namespace TenmoServer.Controllers
     public class TransferController : ControllerBase
     {
         private readonly IUserDAO userDao;
-        private readonly ReturnUser user;
 
-        public TransferController(IUserDAO _userDao, ReturnUser _user)
+        public TransferController(IUserDAO _userDao)
         {
             userDao = _userDao;
-            user = _user;
         }
 
         [HttpGet]
         public ActionResult<List<Transfer>> GetTransfers()
         {
-            
+            string username = User.Identity.Name;
             try
             {
-                List<Transfer> transfers = userDao.GetTransfers(user);
+                List<Transfer> transfers = userDao.GetTransfers(username);
                 return Ok(transfers);
             }
             catch (Exception)
@@ -41,10 +39,12 @@ namespace TenmoServer.Controllers
         [HttpGet("{transferId}")]
         public ActionResult<Transfer> GetTransferById(int transferId)
         {
+            string username = User.Identity.Name;
+
             // Get a single transfer based on Id
             try
             {
-                Transfer singleTransfer = userDao.GetTransferById(transferId, user);
+                Transfer singleTransfer = userDao.GetTransferById(transferId, username);
                 return Ok(singleTransfer);
             }
             catch (Exception)
