@@ -21,20 +21,7 @@ namespace TenmoServer.Controllers
             userDao = _userDao;
         }
 
-        [HttpGet]
-        public ActionResult<List<Transfer>> GetTransfers()
-        {
-            string username = User.Identity.Name;
-            try
-            {
-                List<Transfer> transfers = userDao.GetTransfers(username);
-                return Ok(transfers);
-            }
-            catch (Exception)
-            {
-                return NotFound();
-            }
-        }
+
 
         [HttpGet("{transferId}")]
         public ActionResult<Transfer> GetTransferById(int transferId)

@@ -52,5 +52,19 @@ namespace TenmoServer.Controllers
                 return NotFound();
             }
         }
+        [HttpGet("{userId}/transfer")]
+        public ActionResult<List<Transfer>> GetTransfers(int userId)
+        {
+            
+            try
+            {
+                List<Transfer> transfers = userDAO.GetTransfers(userId);
+                return Ok(transfers);
+            }
+            catch (Exception)
+            {
+                return NotFound();
+            }
+        }
     }
 }
