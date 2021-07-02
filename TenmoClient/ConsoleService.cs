@@ -10,7 +10,9 @@ namespace TenmoClient
     {
         private readonly static string API_BASE_URL = "https://localhost:44315/";
         private readonly RestClient client = new RestClient();
-        private readonly API_User user;
+        private static API_User user = new API_User();
+
+
         /// <summary>
         /// Prompts for transfer ID to view, approve, or reject
         /// </summary>
@@ -77,9 +79,7 @@ namespace TenmoClient
         }
         public Balance ReturnBalance()
         {
-            Balance balance = null;
-            RestRequest request = new RestRequest(API_BASE_URL + "user/balance");
-            request.AddJsonBody(user);
+            RestRequest request = new RestRequest(API_BASE_URL + $"user/{UserService.GetUserId()}/balance");
             IRestResponse<Balance> response = client.Get<Balance>(request);
 
             if (response.ResponseStatus != ResponseStatus.Completed)
@@ -92,9 +92,10 @@ namespace TenmoClient
             }
             else
             {
+                Balance balance = response.Data;
                 Console.WriteLine();
                 Console.WriteLine($"Your Balance is currently {response.Data.PrimaryBalance}");
-                return response.Data;
+                return balance;
             }
         }
     }

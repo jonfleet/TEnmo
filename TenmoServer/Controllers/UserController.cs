@@ -20,14 +20,13 @@ namespace TenmoServer.Controllers
             userDAO = _userDAO;
         }
         
-        [HttpGet("balance")]
-        public ActionResult<Balance> GetTheBalance()
+        [HttpGet("{userId}/balance")]
+        public ActionResult<Balance> GetTheBalance(int userId)
         {
-            string username = User.Identity.Name;
 
             try
             {
-                Balance balance = userDAO.GetBalance(username);
+                Balance balance = userDAO.GetBalance(userId);
                 if(balance.UserId != 0)
                 {
                 return Ok(balance);
