@@ -246,7 +246,7 @@ namespace TenmoServer.DAO
             return transfer;
         }
 
-        public Balance GetBalance(string username)
+        public Balance GetBalance(int userId)
         {
             Balance userBalance = new Balance();
 
@@ -255,8 +255,8 @@ namespace TenmoServer.DAO
                 using (SqlConnection conny = new SqlConnection(connectionString))
                 {
                     conny.Open();
-                    SqlCommand cmd = new SqlCommand("select * from accounts as a join users as u on u.user_id = a.user_id where u.username = @username;", conny);
-                    cmd.Parameters.AddWithValue("@username", username);
+                    SqlCommand cmd = new SqlCommand("select * from accounts as a where a.user_id = @userId;", conny);
+                    cmd.Parameters.AddWithValue("@userId", userId);
                     SqlDataReader reader = cmd.ExecuteReader();
                     if (reader.Read())
                     {
