@@ -132,6 +132,9 @@ namespace TenmoClient
             if (response.ResponseStatus != ResponseStatus.Completed)
             {
                 throw new HttpRequestException("An error occurred while communicating with the server");
+            } else if ((int)response.StatusCode == 400)
+            {
+                throw new HttpRequestException("Error: Insufficient Balance. Please try again.");
             }
             else if (!response.IsSuccessful)
             {

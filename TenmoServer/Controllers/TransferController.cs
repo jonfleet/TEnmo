@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TenmoServer.DAO;
+using TenmoServer.Exceptions;
 using TenmoServer.Models;
 
 namespace TenmoServer.Controllers
@@ -49,6 +50,10 @@ namespace TenmoServer.Controllers
             {
                 Transfer completedPayment = userDao.CreateTransfer(transfer, "Send");
                 return Ok(completedPayment);
+            }
+            catch (InsufficientBalanceException)
+            {
+                return BadRequest();
             }
             catch (Exception)
             {

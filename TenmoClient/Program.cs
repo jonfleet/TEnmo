@@ -137,8 +137,15 @@ namespace TenmoClient
             Console.WriteLine();
             Console.WriteLine("Please enter the amount you would like to send: ");
             decimal amount = decimal.Parse(Console.ReadLine().Trim());
-
-            consoleService.SendTransfer(amount, toUserId);
+            try
+            {
+                consoleService.SendTransfer(amount, toUserId);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+            
 
         }
     }

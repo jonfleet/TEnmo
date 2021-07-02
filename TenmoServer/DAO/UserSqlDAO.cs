@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using TenmoServer.Exceptions;
 using TenmoServer.Models;
 using TenmoServer.Security;
 using TenmoServer.Security.Models;
@@ -194,6 +195,48 @@ namespace TenmoServer.DAO
                 {
                     conny.Open();
 
+                    // Determine if Sufficient Balance is available
+                    SqlCommand getBalance = new SqlCommand("select balance from accounts where user_id = @fromUser", conny);
+                    getBalance.Parameters.AddWithValue("@fromUser", transfer.FromUserId);
+                    SqlDataReader reader = getBalance.ExecuteReader();
+
+                    decimal currentBalance = 0;
+                    if (reader.Read())
+                    {
+                        currentBalance = Convert.ToDecimal(reader["balance"]); 
+                    }
+
+                    // Throw Error if balance is not enough to complete transfer
+                    if(currentBalance <= transfer.Amount)
+                    {
+                        throw new InsufficientBalanceException();
+                    }
+                    
+
+                    // Decrement FromUserBalance
+                    SqlCommand decrementCommand = new SqlCommand(
+                        "IF((select balance from accounts where user_id = @fromUser) > @withdrawAmount) " +
+                        "BEGIN " +
+                            "Update accounts " +
+                            "set balance = balance - @withdrawAmount " +
+                            "where user_id = @fromUser; " +
+                         "END", conny);
+                    decrementCommand.Parameters.AddWithValue("@withdrawAmount", transfer.Amount);
+                    decrementCommand.Parameters.AddWithValue("@fromUser", transfer.FromUserId);
+
+                    decrementCommand.ExecuteScalar();
+
+                    // Increment ToUserBalance
+                    SqlCommand incrementCommand = new SqlCommand(
+                        "Update accounts " +
+                        "set balance = balance + @depositAmount " +
+                        "where user_id = @toUser;", conny
+                    );
+                    incrementCommand.Parameters.AddWithValue("@depositAmount", transfer.Amount);
+                    incrementCommand.Parameters.AddWithValue("@toUser", transfer.ToUserId);
+
+                    incrementCommand.ExecuteScalar();
+
                     // Create new Transaction
                     SqlCommand cmd = new SqlCommand("Insert into transfers(transfer_type_id, transfer_status_id, account_from, account_to, amount) " +
                         "OUTPUT INSERTED.transfer_id " +
@@ -213,29 +256,9 @@ namespace TenmoServer.DAO
 
                     transfer.TransferId = Convert.ToInt32(cmd.ExecuteScalar());
 
-                    // Decrement FromUserBalance
-                    SqlCommand decrementCommand = new SqlCommand(
-                        "IF((select balance from accounts where user_id = @fromUser) > @withdrawAmount) " +
-                        "BEGIN " +
-                            "Update accounts " +
-                            "set balance = balance - @withdrawAmount " +
-                            "where user_id = @fromUser; " +
-                         "END", conny);
-                    decrementCommand.Parameters.AddWithValue("@withdrawAmount", transfer.Amount);
-                    decrementCommand.Parameters.AddWithValue("@fromUser", transfer.FromUserId);
-
-                    decrementCommand.ExecuteScalar();
                     
-                    // Increment ToUserBalance
-                    SqlCommand incrementCommand = new SqlCommand(
-                        "Update accounts " +
-                        "set balance = balance + @depositAmount " +
-                        "where user_id = @toUser;", conny
-                    );
-                    incrementCommand.Parameters.AddWithValue("@depositAmount", transfer.Amount);
-                    incrementCommand.Parameters.AddWithValue("@toUser", transfer.ToUserId);
                     
-                    incrementCommand.ExecuteScalar();
+                    
                 }
             }
             catch (Exception e)
