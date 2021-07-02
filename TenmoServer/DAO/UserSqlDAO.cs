@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using TenmoServer.Models;
@@ -187,7 +188,6 @@ namespace TenmoServer.DAO
 
         public Transfer CreateTransfer(Transfer transfer)
         {
-            Transfer sentPayment = null;
             try
             {
                 using (SqlConnection conny = new SqlConnection(connectionString))
@@ -209,12 +209,9 @@ namespace TenmoServer.DAO
                     cmd.Parameters.AddWithValue("@toUser", transfer.ToUserId);
                     cmd.Parameters.AddWithValue("@amount", transfer.Amount);
 
-                    string temp = cmd.ExecuteScalar().ToString();
+                    cmd.ExecuteScalar();
                     SqlDataReader reader = cmd.ExecuteReader();
-                    if(reader.HasRows)
-                    {
-                        sentPayment = GetTransferFromReader(reader);
-                    }
+                    
                 }
             }
             catch (Exception e)
@@ -222,7 +219,7 @@ namespace TenmoServer.DAO
 
                 throw e;
             }
-            return sentPayment;
+            return null;
         }
 
         public Balance GetBalance(string username)
