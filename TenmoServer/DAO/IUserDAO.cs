@@ -10,7 +10,7 @@ namespace TenmoServer.DAO
         List<User> GetUsers();
         Balance GetBalance(int userId);
        
-        List<Transfer> GetTransfers(string username);
+        List<Transfer> GetTransfers(int userId);
         Transfer GetTransferById(int id, string username);
 
         Transfer CreateTransfer(Transfer payment, string transferType);

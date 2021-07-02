@@ -113,7 +113,7 @@ namespace TenmoServer.DAO
         }
 
 
-        public List<Transfer> GetTransfers(string username)
+        public List<Transfer> GetTransfers(int userId)
         {
             List<Transfer> returnTransactions = new List<Transfer>();
 
@@ -128,9 +128,9 @@ namespace TenmoServer.DAO
                         "join users as u " +
                         "on u.user_id = a.user_id " +
                         "where " +
-                        "(t.account_from = (select user_id from users where username = @username)) " +
-                        "or(t.account_to = (select user_id from users where username = @username))", conny);
-                    cmd.Parameters.AddWithValue("@username", username);
+                        "(t.account_from = (select user_id from users where user_id = @userId)) " +
+                        "or(t.account_to = (select user_id from users where user_id = @userId))", conny);
+                    cmd.Parameters.AddWithValue("@userId", userId);
                     SqlDataReader reader = cmd.ExecuteReader();
                     
                     if (reader.HasRows)
@@ -206,7 +206,7 @@ namespace TenmoServer.DAO
                         "   @amount" +
                         ");", conny);
                     cmd.Parameters.AddWithValue("@transferType", transferType);
-                    cmd.Parameters.AddWithValue("@transferStatus", "Pending");
+                    cmd.Parameters.AddWithValue("@transferStatus", "Approved");
                     cmd.Parameters.AddWithValue("@fromUser", transfer.FromUserId);
                     cmd.Parameters.AddWithValue("@toUser", transfer.ToUserId);
                     cmd.Parameters.AddWithValue("@amount", transfer.Amount);

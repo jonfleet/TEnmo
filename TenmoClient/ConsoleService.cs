@@ -9,8 +9,8 @@ namespace TenmoClient
     public class ConsoleService
     {
         private readonly static string API_BASE_URL = "https://localhost:44315/";
+        private readonly static string TRANSFER_BASE_URL = "https://localhost:44315/transfer/";
         private readonly RestClient client = new RestClient();
-        private static API_User user = new API_User();
 
 
         /// <summary>
@@ -98,5 +98,55 @@ namespace TenmoClient
                 return balance;
             }
         }
+
+        public List<Transfer> GetTransfers()
+        {
+            
+            RestRequest request = new RestRequest(API_BASE_URL + $"user/{UserService.GetUserId()}/transfer");
+            IRestResponse<List<Transfer>> response = client.Get<List<Transfer>>(request);
+            if (response.ResponseStatus != ResponseStatus.Completed)
+            {
+                throw new HttpRequestException("An error occurred communication with the server");
+            }
+            else if (!response.IsSuccessful)
+            {
+                throw new HttpRequestException("Response was unsuccessful: " + (int)response.StatusCode + " " + response.StatusDescription);
+            }
+            else
+            {
+                List<Transfer> transfers = response.Data;
+                return transfers;
+            }
+        }
+
+        public Transfer SendTransfer(decimal amount, int toUserId)
+        {
+            RestRequest request = new RestRequest(TRANSFER_BASE_URL + "send");
+            Transfer transfer = new Transfer();
+            transfer.FromUserId = UserService.GetUserId();
+            transfer.Amount = amount;
+            transfer.ToUserId = toUserId;
+            request.AddJsonBody(transfer);
+
+            IRestResponse<Transfer> response = client.Post<Transfer>(request);
+            if (response.ResponseStatus != ResponseStatus.Completed)
+            {
+                throw new HttpRequestException("An error occurred communication with the server");
+            }
+            else if (response.IsSuccessful)
+            {
+                throw new HttpRequestException("Response was unsuccessful: " + (int)response.StatusCode + " " + response.StatusDescription);
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        //public List<User> GetUsers()
+        //{
+        //    RestRequest request = new RestRequest(API_BASE_URL + "/user");
+
+        //}
     }
 }

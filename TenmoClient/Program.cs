@@ -90,7 +90,7 @@ namespace TenmoClient
                 }
                 else if (menuSelection == 2)
                 {
-
+                    consoleService.GetTransfers();
                 }
                 else if (menuSelection == 3)
                 {
@@ -98,7 +98,7 @@ namespace TenmoClient
                 }
                 else if (menuSelection == 4)
                 {
-
+                    
                 }
                 else if (menuSelection == 5)
                 {
@@ -116,6 +116,11 @@ namespace TenmoClient
                     Environment.Exit(0);
                 }
             }
+        }
+
+        private void SendTransferMenu()
+        {
+            
         }
     }
 }
