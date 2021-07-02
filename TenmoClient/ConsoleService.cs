@@ -131,9 +131,9 @@ namespace TenmoClient
             IRestResponse<Transfer> response = client.Post<Transfer>(request);
             if (response.ResponseStatus != ResponseStatus.Completed)
             {
-                throw new HttpRequestException("An error occurred communication with the server");
+                throw new HttpRequestException("An error occurred while communicating with the server");
             }
-            else if (response.IsSuccessful)
+            else if (!response.IsSuccessful)
             {
                 throw new HttpRequestException("Response was unsuccessful: " + (int)response.StatusCode + " " + response.StatusDescription);
             }
@@ -143,10 +143,20 @@ namespace TenmoClient
             }
         }
 
-        //public List<User> GetUsers()
-        //{
-        //    RestRequest request = new RestRequest(API_BASE_URL + "/user");
-
-        //}
+        public List<User> GetUsers()
+        {
+            RestRequest request = new RestRequest(API_BASE_URL + "user");
+            IRestResponse<List<User>> response = client.Get<List<User>>(request);
+            if(response.ResponseStatus != ResponseStatus.Completed)
+            {
+                throw new HttpRequestException("An error occured while communicating with the server");
+            } else if (!response.IsSuccessful)
+            {
+                throw new HttpRequestException("Response was unsuccessful: " + (int)response.StatusCode + " " + response.StatusDescription);
+            } else
+            {
+                return response.Data;
+            }
+        }        
     }
 }

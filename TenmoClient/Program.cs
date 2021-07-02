@@ -94,11 +94,11 @@ namespace TenmoClient
                 }
                 else if (menuSelection == 3)
                 {
-
+                    
                 }
                 else if (menuSelection == 4)
                 {
-                    
+                    SendTransferMenu();
                 }
                 else if (menuSelection == 5)
                 {
@@ -118,9 +118,28 @@ namespace TenmoClient
             }
         }
 
-        private void SendTransferMenu()
+        private static void SendTransferMenu()
         {
-            
+            List<User> users = consoleService.GetUsers();
+            Console.WriteLine("Current Users:");
+            Console.WriteLine("User    |    UserId");
+            foreach(User user in users)
+            {
+                if(user.UserId != UserService.GetUserId())
+                {
+                    Console.WriteLine(user.Username + " : " + user.UserId);
+                }
+            }
+
+            Console.WriteLine("Please Enter the userId of the user you would like to send a payment to: ");
+            int toUserId = int.Parse(Console.ReadLine().Trim());
+
+            Console.WriteLine();
+            Console.WriteLine("Please enter the amount you would like to send: ");
+            decimal amount = decimal.Parse(Console.ReadLine().Trim());
+
+            consoleService.SendTransfer(amount, toUserId);
+
         }
     }
 }
