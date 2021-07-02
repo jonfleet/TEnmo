@@ -48,13 +48,29 @@ where user_id = 1,
 
 
 begin transaction
-Insert into transfers (transfer_type_id, transfer_status_id, account_from, account_to, amount) output INSERTED.transfer_id values ( (select transfer_type_id from transfer_types where transfer_type_desc = 'Send'), (select transfer_status_id from transfer_statuses where transfer_status_desc = 'Approved'), 1,  3, 45.50);
+Insert into transfers (transfer_type_id, transfer_status_id, account_from, account_to, amount) 
+output INSERTED.transfer_id 
+values 
+( 
+	(select transfer_type_id from transfer_types where transfer_type_desc = 'Send'), 
+	(select transfer_status_id from transfer_statuses where transfer_status_desc = 'Approved'),
+	2,  
+	3, 
+	45.50
+);
+
 select * from transfers;
 select * from transfer_types;
 select * from transfer_statuses;
 rollback
 
+select * from users;
 -- Decrement the Sender Balance
 -- Increment the receiver Balance
  
 
+select * from accounts;
+
+Update accounts
+set balance = balance -1 
+where user_id = 1;

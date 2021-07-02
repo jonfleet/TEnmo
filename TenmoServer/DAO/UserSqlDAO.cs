@@ -186,13 +186,15 @@ namespace TenmoServer.DAO
             return transfer;
         }
 
-        public Transfer CreateTransfer(Transfer transfer)
+        public Transfer CreateTransfer(Transfer transfer, string transferType)
         {
             try
             {
                 using (SqlConnection conny = new SqlConnection(connectionString))
                 {
                     conny.Open();
+
+                    // Create new Transaction
                     SqlCommand cmd = new SqlCommand("Insert into transfers(transfer_type_id, transfer_status_id, account_from, account_to, amount) " +
                         "OUTPUT INSERTED.transfer_id " +
                         "values " +
@@ -203,15 +205,37 @@ namespace TenmoServer.DAO
                         "   @toUser, " +
                         "   @amount" +
                         ");", conny);
-                    cmd.Parameters.AddWithValue("@transferType", transfer.TransferTypeId);
-                    cmd.Parameters.AddWithValue("@transferStatus", transfer.TransferStatusId);
+                    cmd.Parameters.AddWithValue("@transferType", transferType);
+                    cmd.Parameters.AddWithValue("@transferStatus", "Pending");
                     cmd.Parameters.AddWithValue("@fromUser", transfer.FromUserId);
                     cmd.Parameters.AddWithValue("@toUser", transfer.ToUserId);
                     cmd.Parameters.AddWithValue("@amount", transfer.Amount);
 
-                    cmd.ExecuteScalar();
-                    SqlDataReader reader = cmd.ExecuteReader();
+                    transfer.TransferId = Convert.ToInt32(cmd.ExecuteScalar());
+
+                    // Decrement FromUserBalance
+                    SqlCommand decrementCommand = new SqlCommand(
+                        "IF((select balance from accounts where user_id = @fromUser) > @withdrawAmount) " +
+                        "BEGIN " +
+                            "Update accounts " +
+                            "set balance = balance - @withdrawAmount " +
+                            "where user_id = @fromUser; " +
+                         "END", conny);
+                    decrementCommand.Parameters.AddWithValue("@withdrawAmount", transfer.Amount);
+                    decrementCommand.Parameters.AddWithValue("@fromUser", transfer.FromUserId);
+
+                    decrementCommand.ExecuteScalar();
                     
+                    // Increment ToUserBalance
+                    SqlCommand incrementCommand = new SqlCommand(
+                        "Update accounts " +
+                        "set balance = balance + @depositAmount " +
+                        "where user_id = @toUser;", conny
+                    );
+                    incrementCommand.Parameters.AddWithValue("@depositAmount", transfer.Amount);
+                    incrementCommand.Parameters.AddWithValue("@toUser", transfer.ToUserId);
+                    
+                    incrementCommand.ExecuteScalar();
                 }
             }
             catch (Exception e)
@@ -219,7 +243,7 @@ namespace TenmoServer.DAO
 
                 throw e;
             }
-            return null;
+            return transfer;
         }
 
         public Balance GetBalance(string username)
