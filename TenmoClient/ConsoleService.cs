@@ -9,7 +9,6 @@ namespace TenmoClient
     public class ConsoleService
     {
         private readonly static string API_BASE_URL = "https://localhost:44315/";
-        private readonly static string TRANSFER_BASE_URL = "https://localhost:44315/transfer/";
         private readonly RestClient client = new RestClient();
 
 
