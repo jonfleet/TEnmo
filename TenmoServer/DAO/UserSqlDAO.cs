@@ -205,10 +205,11 @@ namespace TenmoServer.DAO
                     {
                         currentBalance = Convert.ToDecimal(reader["balance"]); 
                     }
-
+                    reader.Close();
                     // Throw Error if balance is not enough to complete transfer
                     if(currentBalance <= transfer.Amount)
                     {
+                        conny.Close();
                         throw new InsufficientBalanceException();
                     }
                     
