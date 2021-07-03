@@ -69,8 +69,22 @@ select * from users;
 -- Increment the receiver Balance
  
 
-select * from accounts;
 
-Update accounts
-set balance = balance -1 
-where user_id = 1;
+begin transaction
+
+
+rollback
+
+IF ((select balance from accounts where user_id = 1) > @withdrawAmount )
+BEGIN
+	Update accounts
+	set balance = balance -1 
+	where user_id = 1;
+END
+ 
+
+ Update accounts
+ set balance = balance + 1
+ where user_id = 1;
+ select * from accounts;
+ select * from transfers;
