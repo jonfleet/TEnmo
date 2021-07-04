@@ -148,7 +148,7 @@ namespace TenmoClient
         {
             List<User> users = generalService.GetUsers();
             Console.WriteLine("Current Users:");
-            Console.WriteLine("User ID | User");
+            Console.WriteLine("User ID  | User");
             foreach (User user in users)
             {
                 if (user.UserId != UserService.GetUserId())
