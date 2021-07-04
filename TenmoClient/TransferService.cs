@@ -20,17 +20,16 @@ namespace TenmoClient
         /// <returns>ID of transfers to view, approve, or reject</returns>
         public int PromptForTransferID(string action)
         {
-            //ToDo Remove Auction Code
             Console.WriteLine("");
             Console.Write("Please enter transfer ID to " + action + " (0 to cancel): ");
-            if (!int.TryParse(Console.ReadLine(), out int auctionId))
+            if (!int.TryParse(Console.ReadLine(), out int transferId))
             {
                 Console.WriteLine("Invalid input. Only input a number.");
                 return 0;
             }
             else
             {
-                return auctionId;
+                return transferId;
             }
         }
         public Transfer SendTransfer(decimal amount, int toUserId)
@@ -57,7 +56,7 @@ namespace TenmoClient
             }
             else
             {
-                return null;
+                return transfer;
             }
         }
 
@@ -80,6 +79,10 @@ namespace TenmoClient
                 return transfers;
             }
         }
+        //public Transfer GetTransferById()
+        //{
+        //    return null;
+        //}
 
     }
 }

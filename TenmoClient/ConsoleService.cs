@@ -87,7 +87,9 @@ namespace TenmoClient
                 }
                 else if (menuSelection == 1)
                 {
-                    generalService.ReturnBalance();
+                    Balance balance = generalService.ReturnBalance();
+                    Console.WriteLine();
+                    Console.WriteLine($"Your Balance is currently {balance.PrimaryBalance.ToString("C2")}");
                 }
                 else if (menuSelection == 2)
                 {
@@ -96,8 +98,25 @@ namespace TenmoClient
                     foreach(Transfer transfer in transfers)
                     {
                         count++;
-                        Console.WriteLine($"{count}   | {transfer.TransferTypeDesc}    | {transfer.TransferStatusDesc}    | {transfer.Amount}");
+                        Console.WriteLine($"Transfer ID: {count.ToString().PadRight(4)}| Transfer Type: {transfer.TransferTypeDesc.ToString().PadRight(8)}" +
+                            $"| Transfer Status: {transfer.TransferStatusDesc.ToString().PadRight(5)}| From User ID:{transfer.FromUserId.ToString().PadRight(4)}" +
+                            $"| To User ID:{transfer.ToUserId.ToString().PadRight(4)}| {transfer.Amount.ToString("C2")}");
                     }
+                    //Console.WriteLine("");
+                    //Console.WriteLine("Would you like to look at the details of a specific transfer?");
+                    //Console.WriteLine("If not, please enter 0");
+                    //int userSelection = -1;
+                    //while (userSelection != 0)
+                    //{
+                    //    if (!int.TryParse(Console.ReadLine(), out userSelection))
+                    //    {
+                    //        Console.WriteLine("That wasn't a number! please use the number pad!!");
+                    //    }
+                    //    else if (userSelection <= transfers.Count - 1)
+                    //    {
+                            
+                    //    }
+                    //}
                 }
                 else if (menuSelection == 3)
                 {
@@ -129,12 +148,12 @@ namespace TenmoClient
         {
             List<User> users = generalService.GetUsers();
             Console.WriteLine("Current Users:");
-            Console.WriteLine("User    |    UserId");
+            Console.WriteLine("User ID  | User");
             foreach (User user in users)
             {
                 if (user.UserId != UserService.GetUserId())
                 {
-                    Console.WriteLine(user.Username + " : " + user.UserId);
+                    Console.WriteLine($"     {user.UserId.ToString().PadRight(3)} : {user.Username}");
                 }
             }
 
@@ -146,7 +165,9 @@ namespace TenmoClient
             decimal amount = decimal.Parse(Console.ReadLine().Trim());
             try
             {
-                transferService.SendTransfer(amount, toUserId);
+                Transfer transfer = transferService.SendTransfer(amount, toUserId);
+                Console.WriteLine("");
+                Console.WriteLine("Transaction Completed!");
             }
             catch (Exception e)
             {

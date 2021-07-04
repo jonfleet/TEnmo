@@ -11,7 +11,7 @@ namespace TenmoServer.DAO
         Balance GetBalance(int userId);
        
         List<Transfer> GetTransfers(int userId);
-        Transfer GetTransferById(int id, string username);
+        Transfer GetTransferById(int userId, int transferId);
 
         Transfer CreateTransfer(Transfer payment, string transferType);
     }
