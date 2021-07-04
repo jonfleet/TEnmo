@@ -13,6 +13,26 @@ namespace TenmoClient
         private readonly static string TRANSFER_BASE_URL = "https://localhost:44315/transfer/";
         private readonly RestClient client = new RestClient();
 
+        /// <summary>
+        /// Prompts for transfer ID to view, approve, or reject
+        /// </summary>
+        /// <param name="action">String to print in prompt. Expected values are "Approve" or "Reject" or "View"</param>
+        /// <returns>ID of transfers to view, approve, or reject</returns>
+        public int PromptForTransferID(string action)
+        {
+            //ToDo Remove Auction Code
+            Console.WriteLine("");
+            Console.Write("Please enter transfer ID to " + action + " (0 to cancel): ");
+            if (!int.TryParse(Console.ReadLine(), out int auctionId))
+            {
+                Console.WriteLine("Invalid input. Only input a number.");
+                return 0;
+            }
+            else
+            {
+                return auctionId;
+            }
+        }
         public Transfer SendTransfer(decimal amount, int toUserId)
         {
             RestRequest request = new RestRequest(TRANSFER_BASE_URL + "send");
