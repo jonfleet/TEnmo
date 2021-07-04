@@ -24,15 +24,14 @@ namespace TenmoServer.Controllers
 
 
 
-        [HttpGet("{transferId}")]
-        public ActionResult<Transfer> GetTransferById(int transferId)
+        [HttpGet("{userId}/{transferId}")]
+        public ActionResult<Transfer> GetTransferById(int userId, int transferId)
         {
-            string username = User.Identity.Name;
 
             // Get a single transfer based on Id
             try
             {
-                Transfer singleTransfer = userDao.GetTransferById(transferId, username);
+                Transfer singleTransfer = userDao.GetTransferById(userId, transferId);
                 return Ok(singleTransfer);
             }
             catch (Exception)

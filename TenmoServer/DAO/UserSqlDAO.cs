@@ -152,7 +152,7 @@ namespace TenmoServer.DAO
             return returnTransactions;
         }
 
-        public Transfer GetTransferById(int transferId, string username)
+        public Transfer GetTransferById(int userId, int transferId)
         {
             Transfer transfer = null;
             try
@@ -166,11 +166,11 @@ namespace TenmoServer.DAO
                         "join users as u " +
                         "on u.user_id = a.user_id " +
                         "where (t.transfer_id = @transferId) and" +
-                        "((t.account_from = (select user_id from users where username = @username))" +
-                        "or(t.account_to = (select user_id from users where username = @username)))", conny);
+                        "((t.account_from = (select user_id from users where user_id = @userId))" +
+                        "or(t.account_to = (select user_id from users where user_id = @userId)))", conny);
 
                     cmd.Parameters.AddWithValue( "@transferId", transferId);
-                    cmd.Parameters.AddWithValue("@username", username);
+                    cmd.Parameters.AddWithValue("@userId", userId);
                     SqlDataReader reader = cmd.ExecuteReader();
                     if(reader.Read())
                     {

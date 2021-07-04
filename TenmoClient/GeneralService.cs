@@ -28,8 +28,6 @@ namespace TenmoClient
             else
             {
                 Balance balance = response.Data;
-                Console.WriteLine();
-                Console.WriteLine($"Your Balance is currently {response.Data.PrimaryBalance}");
                 return balance;
             }
         }
