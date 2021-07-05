@@ -16,6 +16,8 @@
             PasswordHash = passwordHash;
             Salt = salt;
         }
+
+        public User() { }
     }
 
     /// <summary>

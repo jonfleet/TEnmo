@@ -16,6 +16,25 @@ namespace TenmoServer.Tests
         public static IConfiguration Configuration { get; }
         private string ConnectionString = "Server=.\\SQLEXPRESS;Database=tenmo;Trusted_Connection=True;";
         private TransactionScope transaction;
+
+        // Sample Users
+        private readonly User User1 = new User(1, "test1", "password1", "123");
+        private readonly User User2 = new User(2, "test2", "password2", "123");
+        private readonly User User3 = new User(3, "test3", "password3", "123");
+        private readonly User ExpectedNewUser = new User(4, "test4", "", "");
+
+        // Sample Transfers
+        private readonly Transfer Transfer1 = new Transfer(1, 1, 2, 1, 2, 100.0M);
+        private readonly Transfer Transfer2 = new Transfer(2, 1, 2, 1, 3, 200.0M);
+        private readonly Transfer Transfer3 = new Transfer(3, 1, 2, 2, 3, 300.0M);
+
+        //Sample Balances
+        //(1,1, 1000),
+        //(2,2, 1000),
+        //(3, 3, 1000);
+        private readonly Balance Balance1 = new Balance(1, 1, 1000);
+        private readonly Balance Balance2 = new Balance(2, 2, 1500);
+        
         
         [TestInitialize]
         public void Setup()
@@ -36,30 +55,14 @@ namespace TenmoServer.Tests
         }
             
         [TestMethod]
-        public void GetUsersTest()
+        public void GetUsersTest_ReturnAllUsers()
         {
             UserSqlDAO dao = new UserSqlDAO(ConnectionString);
             List<User> expectedUsers = new List<User>();
-            User testUser1 = new User();
-            testUser1.UserId = 1;
-            testUser1.Username = "test1";
-            testUser1.PasswordHash = "password1";
-            testUser1.Salt = "123";
-            expectedUsers.Add(testUser1);
             
-            User testUser2 = new User();
-            testUser2.UserId = 2;
-            testUser2.Username = "test2";
-            testUser2.PasswordHash = "password2";
-            testUser2.Salt = "123";
-            expectedUsers.Add(testUser2);
-
-            User testUser3 = new User();
-            testUser3.UserId = 3;
-            testUser3.Username = "test3";
-            testUser3.PasswordHash = "password3";
-            testUser3.Salt = "123";
-            expectedUsers.Add(testUser3);
+            expectedUsers.Add(User1);
+            expectedUsers.Add(User2);
+            expectedUsers.Add(User3);
             
             List<User> actualUsers = dao.GetUsers();
             if(expectedUsers.Count != actualUsers.Count)
@@ -71,6 +74,15 @@ namespace TenmoServer.Tests
                 AssertUsersMatch(actualUsers[i], expectedUsers[i]);
             }
         }
+        [TestMethod]
+        public void GetUserByUsername_ReturnUser1()
+        {
+            UserSqlDAO dao = new UserSqlDAO(ConnectionString);
+
+            User actualUser = dao.GetUser("test1");
+
+            AssertUsersMatch(actualUser, User1);
+        }
 
         private void AssertUsersMatch(User actual, User expected)
         {
@@ -78,6 +90,86 @@ namespace TenmoServer.Tests
             Assert.AreEqual(actual.Username, expected.Username);
             Assert.AreEqual(actual.PasswordHash, expected.PasswordHash);
             Assert.AreEqual(actual.Salt, expected.Salt);
+        }
+
+        [TestMethod]
+        public void AddUser_ReturnNewUser()
+        {
+            UserSqlDAO dao = new UserSqlDAO(ConnectionString);
+            User actualNewUser = dao.AddUser("test4", "test4");
+
+            Assert.AreEqual(ExpectedNewUser.Username, actualNewUser.Username);
+        }
+
+        [TestMethod]
+        public void GetTransfers_ReturnAllTest2Transfers()
+        {
+            
+
+            UserSqlDAO dao = new UserSqlDAO(ConnectionString);
+            List<Transfer> expectedTransfers = new List<Transfer>();
+            expectedTransfers.Add(Transfer1);
+            expectedTransfers.Add(Transfer3);
+
+            List<Transfer> actualTransfers = dao.GetTransfers(2);
+            if(actualTransfers.Count != expectedTransfers.Count)
+            {
+                Assert.Fail("The query did not return the expected number of transfers");
+            }
+            for(int i = 0; i < actualTransfers.Count; i++)
+            {
+                AssertTransferMatch(actualTransfers[i], expectedTransfers[i]);
+            }
+
+        }
+        [TestMethod]
+        public void GetTransfersById_ReturnTransfer2()
+        {
+            UserSqlDAO dao = new UserSqlDAO(ConnectionString);
+
+            Transfer actualTransfer1 = dao.GetTransferById(2, 1);
+            Transfer actualTransfer2 = dao.GetTransferById(1, 2);
+            Transfer actualTransfer3 = dao.GetTransferById(3, 3);
+            
+            AssertTransferMatch(Transfer1, actualTransfer1);
+            AssertTransferMatch(Transfer2, actualTransfer2);
+            AssertTransferMatch(Transfer3, actualTransfer3);
+            
+        }
+
+        [TestMethod]
+        public void CreateTransfer()
+        {
+            Assert.Fail();
+            // Implement
+        }
+       
+        private void AssertTransferMatch(Transfer expected, Transfer actual)
+        {
+            Assert.AreEqual(expected.TransferId, actual.TransferId);
+            Assert.AreEqual(expected.TransferTypeId, actual.TransferTypeId);
+            Assert.AreEqual(expected.TransferStatusId, actual.TransferStatusId);
+            Assert.AreEqual(expected.FromUserId, actual.FromUserId);
+            Assert.AreEqual(expected.ToUserId, actual.ToUserId);
+            Assert.AreEqual(expected.Amount, actual.Amount);
+        }
+        [TestMethod]
+        public void GetBalance_ReturnUserBalance()
+        {
+            UserSqlDAO dao = new UserSqlDAO(ConnectionString);
+
+            Balance actualUser1Balance = dao.GetBalance(1);
+            Balance actualUser2Balance = dao.GetBalance(2);
+
+            AssertBalanceMatch(Balance1, actualUser1Balance);
+            AssertBalanceMatch(Balance2, actualUser2Balance);
+        }
+
+        private void AssertBalanceMatch(Balance expected, Balance actual)
+        {
+            Assert.AreEqual(expected.AccountId, actual.AccountId);
+            Assert.AreEqual(expected.UserId, actual.UserId);
+            Assert.AreEqual(expected.PrimaryBalance, actual.PrimaryBalance);
         }
 
         [TestCleanup]
