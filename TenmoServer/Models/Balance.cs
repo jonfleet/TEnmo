@@ -10,5 +10,14 @@ namespace TenmoServer.Models
         public int AccountId { get; set; }
         public int UserId { get; set; }
         public decimal PrimaryBalance { get; set; }
+
+        public Balance(int accountId, int userId, decimal primaryBalance)
+        {
+            AccountId = accountId;
+            UserId = userId;
+            PrimaryBalance = primaryBalance;
+        }
+
+        public Balance() { }
     }
 }
