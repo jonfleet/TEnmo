@@ -24,9 +24,9 @@ namespace TenmoServer.Tests
         private readonly User ExpectedNewUser = new User(4, "test4", "", "");
 
         // Sample Transfers
-        private readonly Transfer Transfer1 = new Transfer(1, 1, 2, 1, 2, 100.0M);
-        private readonly Transfer Transfer2 = new Transfer(2, 1, 2, 1, 3, 200.0M);
-        private readonly Transfer Transfer3 = new Transfer(3, 1, 2, 2, 3, 300.0M);
+        private readonly Transfer Transfer1 = new Transfer(1, 2, 2, 1, 2, 100.0M);
+        private readonly Transfer Transfer2 = new Transfer(2, 2, 2, 1, 3, 200.0M);
+        private readonly Transfer Transfer3 = new Transfer(3, 2, 2, 2, 3, 300.0M);
 
         //Sample Balances
         //(1,1, 1000),
@@ -140,8 +140,32 @@ namespace TenmoServer.Tests
         [TestMethod]
         public void CreateTransfer()
         {
-            Assert.Fail();
-            // Implement
+            UserSqlDAO dao = new UserSqlDAO(ConnectionString);
+            Transfer newTransfer = new Transfer();
+            newTransfer.FromUserId = 1;
+            newTransfer.ToUserId = 2;
+            newTransfer.Amount = 100;
+
+            Transfer actualTransfer = dao.CreateTransfer(newTransfer, "Send");
+
+            // Compare to Sample Transfer 1 excluding transferId
+            Assert.AreEqual(Transfer1.TransferStatusId, actualTransfer.TransferStatusId);
+            Assert.AreEqual(Transfer1.TransferTypeId, actualTransfer.TransferTypeId);
+            Assert.AreEqual(Transfer1.ToUserId, actualTransfer.ToUserId);
+            Assert.AreEqual(Transfer1.FromUserId, actualTransfer.FromUserId);
+            Assert.AreEqual(Transfer1.Amount, actualTransfer.Amount);
+
+            // Check to make sure proper amount is withdrawn and deposited
+            Balance actualUser1Balance = dao.GetBalance(1);
+            decimal expectedUser1Balance = Balance1.PrimaryBalance - newTransfer.Amount;
+
+            Assert.AreEqual(expectedUser1Balance, actualUser1Balance.PrimaryBalance);
+
+            Balance actualUser2Balance = dao.GetBalance(2);
+            decimal expectedUser2Balance = Balance2.PrimaryBalance + newTransfer.Amount;
+
+            Assert.AreEqual(expectedUser2Balance, actualUser2Balance.PrimaryBalance);
+
         }
        
         private void AssertTransferMatch(Transfer expected, Transfer actual)

@@ -240,7 +240,7 @@ namespace TenmoServer.DAO
 
                     // Create new Transaction
                     SqlCommand cmd = new SqlCommand("Insert into transfers(transfer_type_id, transfer_status_id, account_from, account_to, amount) " +
-                        "OUTPUT INSERTED.transfer_id " +
+                        "OUTPUT INSERTED.transfer_id, INSERTED.transfer_status_id, INSERTED.transfer_type_id " +
                         "values " +
                         "(" +
                         "   (select transfer_type_id from transfer_types where transfer_type_desc = @transferType), " +
@@ -255,10 +255,13 @@ namespace TenmoServer.DAO
                     cmd.Parameters.AddWithValue("@toUser", transfer.ToUserId);
                     cmd.Parameters.AddWithValue("@amount", transfer.Amount);
 
-                    transfer.TransferId = Convert.ToInt32(cmd.ExecuteScalar());
-
-                    
-                    
+                    SqlDataReader newReader = cmd.ExecuteReader();
+                    while (newReader.Read())
+                    {
+                        transfer.TransferId = Convert.ToInt32(newReader["transfer_id"]);
+                        transfer.TransferStatusId = Convert.ToInt32(newReader["transfer_status_id"]);
+                        transfer.TransferTypeId = Convert.ToInt32(newReader["transfer_type_id"]);
+                    }
                     
                 }
             }
