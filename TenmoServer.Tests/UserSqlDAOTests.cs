@@ -24,9 +24,9 @@ namespace TenmoServer.Tests
         private readonly User ExpectedNewUser = new User(4, "test4", "", "");
 
         // Sample Transfers
-        private readonly Transfer Transfer1 = new Transfer(1, 2, 2, 1, 2, 100.0M);
-        private readonly Transfer Transfer2 = new Transfer(2, 2, 2, 1, 3, 200.0M);
-        private readonly Transfer Transfer3 = new Transfer(3, 2, 2, 2, 3, 300.0M);
+        private readonly Transfer Transfer1 = new Transfer(1, 2, 2, 1, "test1", 2, "test2", 100.0M);
+        private readonly Transfer Transfer2 = new Transfer(2, 2, 2, 1,"test1", 3, "test3", 200.0M);
+        private readonly Transfer Transfer3 = new Transfer(3, 2, 2, 2, "test2", 3, "test3", 300.0M);
 
         //Sample Balances
         //(1,1, 1000),

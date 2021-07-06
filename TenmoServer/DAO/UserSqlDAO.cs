@@ -116,18 +116,21 @@ namespace TenmoServer.DAO
 
         public List<Transfer> GetTransfers(int userId)
         {
-            List<Transfer> returnTransactions = new List<Transfer>();
+            List<Transfer> returnTransfers = new List<Transfer>();
 
             try
             {
                 using (SqlConnection conny = new SqlConnection(connectionString))
                 {
                     conny.Open();
-                    SqlCommand cmd = new SqlCommand("select * from transfers as t " +
+                    SqlCommand cmd = new SqlCommand("select transfer_id, transfer_type_id, transfer_status_id, account_from, account_to, amount, u_to.username as to_username, u_from.username as from_username " +
+                        "from transfers as t " +
                         "join accounts as a " +
                         "on a.account_id = t.account_from " +
-                        "join users as u " +
-                        "on u.user_id = a.user_id " +
+                        "join users as u_from " +
+                        "on u_from.user_id = t.account_from " +
+                        "join users as u_to " +
+                        "on u_to.user_id = t.account_to " +
                         "where " +
                         "(t.account_from = (select user_id from users where user_id = @userId)) " +
                         "or(t.account_to = (select user_id from users where user_id = @userId))", conny);
@@ -139,7 +142,7 @@ namespace TenmoServer.DAO
                         while (reader.Read())
                         {
                             Transfer t = GetTransferFromReader(reader);
-                            returnTransactions.Add(t);
+                            returnTransfers.Add(t);
                         }
                     }
                 }
@@ -149,7 +152,7 @@ namespace TenmoServer.DAO
 
                 throw e;
             }
-            return returnTransactions;
+            return returnTransfers;
         }
 
         public Transfer GetTransferById(int userId, int transferId)
@@ -159,13 +162,27 @@ namespace TenmoServer.DAO
             {
                 using (SqlConnection conny = new SqlConnection(connectionString))
                 {
+
+                //    TransferId = Convert.ToInt32(reader["transfer_id"]),
+                //TransferTypeId = Convert.ToInt32(reader["transfer_type_id"]),
+                //TransferStatusId = Convert.ToInt32(reader["transfer_status_id"]),
+                //FromUserId = Convert.ToInt32(reader["account_from"]),
+                //ToUserId = Convert.ToInt32(reader["account_to"]),
+                //Amount = Convert.ToDecimal(reader["amount"]),
+                //ToUsername = Convert.ToString(reader["u_to.username"]),
+                //FromUsername = Convert.ToString(reader["u_from.username"])
+
                     conny.Open();
-                    SqlCommand cmd = new SqlCommand("select * from transfers as t " +
+                    SqlCommand cmd = new SqlCommand("select transfer_id, transfer_type_id, transfer_status_id, account_from, account_to, amount, u_to.username as to_username, u_from.username as from_username " +
+                        "from transfers as t " +
                         "join accounts as a " +
                         "on a.account_id = t.account_from " +
-                        "join users as u " +
-                        "on u.user_id = a.user_id " +
-                        "where (t.transfer_id = @transferId) and" +
+                        "join users as u_from " +
+                        "on u_from.user_id = t.account_from " +
+                        "join users as u_to " +
+                        "on u_to.user_id = t.account_to " +
+                        "where " +
+                        "(t.transfer_id = @transferId) and" +
                         "((t.account_from = (select user_id from users where user_id = @userId))" +
                         "or(t.account_to = (select user_id from users where user_id = @userId)))", conny);
 
@@ -314,7 +331,7 @@ namespace TenmoServer.DAO
         }
         private Transfer GetTransferFromReader(SqlDataReader reader)
         {
-            Transfer t = new Transfer()
+            Transfer transfer = new Transfer()
             {
                 TransferId = Convert.ToInt32(reader["transfer_id"]),
                 TransferTypeId = Convert.ToInt32(reader["transfer_type_id"]),
@@ -322,8 +339,10 @@ namespace TenmoServer.DAO
                 FromUserId = Convert.ToInt32(reader["account_from"]),
                 ToUserId = Convert.ToInt32(reader["account_to"]),
                 Amount = Convert.ToDecimal(reader["amount"]),
+                ToUsername = Convert.ToString(reader["to_username"]),
+                FromUsername = Convert.ToString(reader["from_username"])
             };
-            return t;
+            return transfer;
         }
         
     }
