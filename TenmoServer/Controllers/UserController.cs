@@ -66,5 +66,18 @@ namespace TenmoServer.Controllers
                 return NotFound();
             }
         }
+        [HttpGet("{userId}/pending")]
+        public ActionResult<Transfer> GetPendingTransfers(int userId)
+        {
+            try
+            {             
+                List<Transfer> transfers = userDAO.GetPendingTransfersForUser(userId);
+                return Ok(transfers);
+            }
+            catch (Exception)
+            {
+                return NotFound();
+            }
+        }
     }
 }

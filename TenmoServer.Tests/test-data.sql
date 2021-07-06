@@ -43,9 +43,10 @@ SET IDENTITY_INSERT accounts OFF;
 -- Add Transfers
 SET IDENTITY_INSERT transfers ON;
 INSERT INTO transfers (transfer_id, transfer_type_id, transfer_status_id, account_from, account_to, amount)
-VALUES (1, 2, 2, 1 , 2, 100),
-	   (2, 2, 2, 1 , 3 , 200),
-	   (3, 2, 2, 2, 3, 300);
+VALUES (1, 1, 1, 1 , 2, 100),
+	   (2, 1, 2, 1 , 2 , 100),
+	   (3, 1, 3, 2, 3, 300),
+	   (4, 2, 2, 3, 1, 400);
 SET IDENTITY_INSERT transfers OFF;
 
 
