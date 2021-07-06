@@ -97,7 +97,7 @@ namespace TenmoClient
                 }
                 else if (menuSelection == 3)
                 {
-
+                    PendingTransferMenu();
                 }
                 else if (menuSelection == 4)
                 {
@@ -105,7 +105,7 @@ namespace TenmoClient
                 }
                 else if (menuSelection == 5)
                 {
-
+                    RequestTransferMenu();
                 }
                 else if (menuSelection == 6)
                 {
@@ -123,17 +123,7 @@ namespace TenmoClient
 
         private static void SendTransferMenu()
         {
-            List<User> users = generalService.GetUsers();
-            Console.WriteLine("Current Users:");
-            Console.WriteLine("User ID  | User");
-            foreach (User user in users)
-            {
-                if (user.UserId != UserService.GetUserId())
-                {
-                    Console.WriteLine($"     {user.UserId.ToString().PadRight(3)} : {user.Username}");
-                }
-            }
-
+            ListUsers();
             Console.WriteLine("Please Enter the userId of the user you would like to send a payment to: ");
             int toUserId = int.Parse(Console.ReadLine().Trim());
 
@@ -152,27 +142,32 @@ namespace TenmoClient
             }
 
 
-        }       
+        }
+        private static void RequestTransferMenu()
+        {
+            ListUsers();
+            Console.WriteLine("Please Enter the userId of the user you would like to request a payment from: ");
+            int fromUserId = int.Parse(Console.ReadLine().Trim());
+
+            Console.WriteLine();
+            Console.WriteLine("Please enter the amount you would like to request: ");
+            decimal amount = decimal.Parse(Console.ReadLine().Trim());
+            try
+            {
+                Transfer transfer = transferService.RequestTransfer(amount, fromUserId);
+                Console.WriteLine("");
+                Console.WriteLine("Request Created!");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+        }
 
         private static void GetTransferMenu()
         {
             List<Transfer> transfers = transferService.GetTransfers();
-            int count = 0;
-            foreach (Transfer transfer in transfers)
-            {
-                count++;
-
-                Console.Write($"Transfer ID: {transfer.TransferId.ToString().PadRight(4)}");
-                if (UserService.GetUserId() != transfer.FromUserId)
-                {
-                    Console.Write($"| From: {transfer.FromUsername.ToString().PadRight(12)}");
-                }
-                if (UserService.GetUserId() != transfer.ToUserId)
-                {
-                    Console.Write($"| To  : {transfer.ToUsername.ToString().PadRight(12)}");
-                }
-                Console.Write($"| Amount: {transfer.Amount.ToString("C2")}\n");
-            }
+            ListTransfers(transfers);
 
             string userSelection;
             do
@@ -208,6 +203,88 @@ namespace TenmoClient
                 }
 
             } while (userSelection.ToLower() != "n" && userSelection.ToLower() != "no");
+
+        }
+        private static void PendingTransferMenu()
+        {
+            List<Transfer> transfers = transferService.GetPendingTransfers();
+            ListTransfers(transfers);
+            string userSelection;
+            Console.WriteLine("");
+            Console.WriteLine("Would you like to approve/reject a specific transfer (Y/N)?");
+            userSelection = Console.ReadLine();
+
+            if (userSelection.ToLower().Trim() == "y" || userSelection.ToLower().Trim() == "yes")
+            {
+                // GetTransferById 
+                Console.WriteLine();
+                Console.WriteLine("Enter the transferId number.");
+
+                try
+                {
+                    int transferId = int.Parse(Console.ReadLine());
+                    Transfer transfer = transferService.GetTransferById(transferId);
+
+                    Console.WriteLine("");
+                    Console.WriteLine($"| Transfer ID: {transfer.TransferId.ToString().PadRight(4)}\n" +
+                    $"| Transfer Type: {transfer.TransferTypeDesc.ToString().PadRight(8)}\n" +
+                    $"| Transfer Status: {transfer.TransferStatusDesc.ToString().PadRight(5)}\n" +
+                    $"| From User : {transfer.FromUsername.ToString().PadRight(4)}\n" +
+                    $"| To User : {transfer.ToUsername.ToString().PadRight(4)}\n" +
+                    $"| Amount: {transfer.Amount.ToString("C2")}\n");
+
+                    //need to add approve method!!!!
+                    Console.WriteLine("");
+                    Console.WriteLine("Would you like to Approve or Reject this transfer?");
+                    userSelection = Console.ReadLine();
+                    if (userSelection.ToLower().Trim() == "a" || userSelection.ToLower().Trim() == "approve")
+                    {
+                        transferService.ApproveTransfer(transfer.TransferId);
+                    }
+                    else if (userSelection.ToLower().Trim() == "r" || userSelection.ToLower().Trim() == "reject")
+                    {
+                        transferService.RejectTransfer(transfer.TransferId);
+                    }
+                }
+                catch (Exception)
+                {
+                    Console.WriteLine("Invalid Entry. Please try again.");
+                }
+            }
+            
+        }
+        
+        private static void ListTransfers(List<Transfer> transfers)
+        {
+            int count = 0;
+            foreach (Transfer transfer in transfers)
+            {
+                count++;
+
+                Console.Write($"Transfer ID: {transfer.TransferId.ToString().PadRight(4)}");
+                if (UserService.GetUserId() != transfer.FromUserId)
+                {
+                    Console.Write($"| From: {transfer.FromUsername.ToString().PadRight(12)}");
+                }
+                if (UserService.GetUserId() != transfer.ToUserId)
+                {
+                    Console.Write($"| To  : {transfer.ToUsername.ToString().PadRight(12)}");
+                }
+                Console.Write($"| Amount: {transfer.Amount.ToString("C2")}\n");
+            }
+        }
+        private static void ListUsers()
+        {
+            List<User> users = generalService.GetUsers();
+            Console.WriteLine("Current Users:");
+            Console.WriteLine("User ID  | User");
+            foreach (User user in users)
+            {
+                if (user.UserId != UserService.GetUserId())
+                {
+                    Console.WriteLine($"     {user.UserId.ToString().PadRight(3)} : {user.Username}");
+                }
+            }
         }
     }
 }

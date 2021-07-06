@@ -83,10 +83,82 @@ namespace TenmoClient
                 return transfers;
             }
         }
-        //public Transfer GetTransferById()
-        //{
-        //    return null;
-        //}
+        public List<Transfer> GetPendingTransfers()
+        {
+            RestRequest request = new RestRequest(API_BASE_URL + $"user/{UserService.GetUserId()}/pending");
+            IRestResponse<List<Transfer>> response = client.Get<List<Transfer>>(request);
+            if (response.ResponseStatus != ResponseStatus.Completed)
+            {
+                throw new HttpRequestException("An error occurred communication with the server");
+            }
+            else if (!response.IsSuccessful)
+            {
+                throw new HttpRequestException("Response was unsuccessful: " + (int)response.StatusCode + " " + response.StatusDescription);
+            }
+            else
+            {
+                List<Transfer> transfers = response.Data;
+                return transfers;
+            }
+        }
+        public Transfer RequestTransfer(decimal amount, int fromUserId)
+        {
+            RestRequest request = new RestRequest(API_BASE_URL + "request/" + UserService.GetUserId());
+            Transfer transfer = new Transfer();
+            transfer.ToUserId = UserService.GetUserId();
+            transfer.FromUserId = fromUserId;
+            transfer.Amount = amount;
+            request.AddJsonBody(transfer);
+            IRestResponse<Transfer> response = client.Post<Transfer>(request);
+            if (response.ResponseStatus != ResponseStatus.Completed)
+            {
+                throw new HttpRequestException("An error occurred while communicating with the server");
+            }
+            else if (!response.IsSuccessful)
+            {
+                throw new HttpRequestException("Response was unsuccessful: " + (int)response.StatusCode + " " + response.StatusDescription);
+            }
+            else
+            {
+                return transfer;
+            }
+        }
+        public Transfer ApproveTransfer(int transferId)
+        {
+            Transfer transfer = null;
+            RestRequest request = new RestRequest(API_BASE_URL + "approve/" + transferId);
+            IRestResponse<Transfer> response = client.Put<Transfer>(request);
+            if (response.ResponseStatus != ResponseStatus.Completed)
+            {
+                throw new HttpRequestException("An error occurred while communicating with the server");
+            }
+            else if (!response.IsSuccessful)
+            {
+                throw new HttpRequestException("Response was unsuccessful: " + (int)response.StatusCode + " " + response.StatusDescription);
+            }
+            else
+            {
+                return transfer;
+            }
+        }
+        public Transfer RejectTransfer(int transferId)
+        {
+            Transfer transfer = null;
+            RestRequest request = new RestRequest(API_BASE_URL + "reject/" + transferId);
+            IRestResponse<Transfer> response = client.Put<Transfer>(request);
+            if (response.ResponseStatus != ResponseStatus.Completed)
+            {
+                throw new HttpRequestException("An error occurred while communicating with the server");
+            }
+            else if (!response.IsSuccessful)
+            {
+                throw new HttpRequestException("Response was unsuccessful: " + (int)response.StatusCode + " " + response.StatusDescription);
+            }
+            else
+            {
+                return transfer;
+            }
+        }
 
     }
 }
