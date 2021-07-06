@@ -210,11 +210,11 @@ namespace TenmoServer.Tests
             // Test Approval of TransferRequestPending
             Transfer actualSendApproved = dao.ApproveTransfer(TransferSendPending);
 
-            Assert.AreEqual(TransferRequestApproved.TransferStatusId, actualSendApproved.TransferStatusId);
-            Assert.AreEqual(TransferRequestApproved.TransferTypeId, actualSendApproved.TransferTypeId);
-            Assert.AreEqual(TransferRequestApproved.ToUserId, actualSendApproved.ToUserId);
-            Assert.AreEqual(TransferRequestApproved.FromUserId, actualSendApproved.FromUserId);
-            Assert.AreEqual(TransferRequestApproved.Amount, actualSendApproved.Amount);
+            Assert.AreEqual(TransferSendApproved.TransferStatusId, actualSendApproved.TransferStatusId);
+            Assert.AreEqual(TransferSendApproved.TransferTypeId, actualSendApproved.TransferTypeId);
+            Assert.AreEqual(TransferSendApproved.ToUserId, actualSendApproved.ToUserId);
+            Assert.AreEqual(TransferSendApproved.FromUserId, actualSendApproved.FromUserId);
+            Assert.AreEqual(TransferSendApproved.Amount, actualSendApproved.Amount);
 
 
             // Check to make sure proper amount is withdrawn and deposited
@@ -230,9 +230,32 @@ namespace TenmoServer.Tests
         }
 
         [TestMethod]
-        public void RejectTransfer()
+        public void RejectRequestTransfer()
         {
-            Assert.Fail();
+            IUserDAO dao = new UserSqlDAO(ConnectionString);
+
+            // Test Approval of TransferRequestPending
+            Transfer actualRequestRejected = dao.RejectTransfer(TransferRequestPending);
+
+            Assert.AreEqual(TransferRequestRejected.TransferStatusId, actualRequestRejected.TransferStatusId);
+            Assert.AreEqual(TransferRequestRejected.TransferTypeId, actualRequestRejected.TransferTypeId);
+            Assert.AreEqual(TransferRequestRejected.ToUserId, actualRequestRejected.ToUserId);
+            Assert.AreEqual(TransferRequestRejected.FromUserId, actualRequestRejected.FromUserId);
+            Assert.AreEqual(TransferRequestRejected.Amount, actualRequestRejected.Amount);
+        }
+        [TestMethod]
+        public void RejectSendTransfer()
+        {
+            IUserDAO dao = new UserSqlDAO(ConnectionString);
+
+            // Test Approval of TransferRequestPending
+            Transfer actualSendRejected = dao.RejectTransfer(TransferSendPending);
+
+            Assert.AreEqual(TransferSendRejected.TransferStatusId, actualSendRejected.TransferStatusId);
+            Assert.AreEqual(TransferSendRejected.TransferTypeId, actualSendRejected.TransferTypeId);
+            Assert.AreEqual(TransferSendRejected.ToUserId, actualSendRejected.ToUserId);
+            Assert.AreEqual(TransferSendRejected.FromUserId, actualSendRejected.FromUserId);
+            Assert.AreEqual(TransferSendRejected.Amount, actualSendRejected.Amount);
         }
        
         private void AssertTransferMatch(Transfer expected, Transfer actual)

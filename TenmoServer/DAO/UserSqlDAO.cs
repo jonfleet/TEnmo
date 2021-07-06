@@ -344,11 +344,17 @@ namespace TenmoServer.DAO
                     conny.Open();
 
                     //Update Transaction to "Rejected"
-                    SqlCommand cmd = new SqlCommand("update transfers set transfer_status_id = 3 " +
+                    SqlCommand cmd = new SqlCommand("update transfers set transfer_status_id = " +
+                        "(select transfer_status_id from transfer_statuses where transfer_status_desc = 'Rejected') " +
+                        "OUTPUT inserted.transfer_status_id " +
                         "where transfer_id = @transferId;", conny);
                     cmd.Parameters.AddWithValue("@transferId", transfer.TransferId);
 
-                    cmd.ExecuteScalar();
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    if (reader.Read())
+                    {
+                        transfer.TransferStatusId = Convert.ToInt32(reader["transfer_status_id"]);
+                    }
                 }
             }
             catch (Exception e)
