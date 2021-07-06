@@ -98,25 +98,47 @@ namespace TenmoClient
                     foreach(Transfer transfer in transfers)
                     {
                         count++;
-                        Console.WriteLine($"Transfer ID: {count.ToString().PadRight(4)}| Transfer Type: {transfer.TransferTypeDesc.ToString().PadRight(8)}" +
-                            $"| Transfer Status: {transfer.TransferStatusDesc.ToString().PadRight(5)}| From User ID:{transfer.FromUserId.ToString().PadRight(4)}" +
-                            $"| To User ID:{transfer.ToUserId.ToString().PadRight(4)}| {transfer.Amount.ToString("C2")}");
+                        //Id
+                        //From or To
+                        // Amount
+                        Console.WriteLine($"Transfer ID: {transfer.TransferId.ToString().PadRight(4)}" +
+                            $"| Transfer Type: {transfer.TransferTypeDesc.ToString().PadRight(8)}" +
+                            $"| Transfer Status: {transfer.TransferStatusDesc.ToString().PadRight(5)}" +
+                            $"| From User ID:{transfer.FromUserId.ToString().PadRight(4)}" +
+                            $"| To User ID:{transfer.ToUserId.ToString().PadRight(4)}" +
+                            $"| {transfer.Amount.ToString("C2")}");
                     }
-                    //Console.WriteLine("");
-                    //Console.WriteLine("Would you like to look at the details of a specific transfer?");
-                    //Console.WriteLine("If not, please enter 0");
-                    //int userSelection = -1;
-                    //while (userSelection != 0)
-                    //{
-                    //    if (!int.TryParse(Console.ReadLine(), out userSelection))
-                    //    {
-                    //        Console.WriteLine("That wasn't a number! please use the number pad!!");
-                    //    }
-                    //    else if (userSelection <= transfers.Count - 1)
-                    //    {
+
+                    string userSelection;
+                    do
+                    {
+                        Console.WriteLine("");
+                        Console.WriteLine("Would you like to look at the details of a specific transfer (Y/N)?");
+                        userSelection = Console.ReadLine();
+
+                        if (userSelection.ToLower().Trim() == "y" || userSelection.ToLower().Trim() == "yes")
+                        {
+                            // GetTransferById 
+                            Console.WriteLine();
+                            Console.WriteLine("Enter the transferId number.");
+                            int transferId = int.Parse(Console.ReadLine());
+                            try
+                            {
+                                Transfer transfer = transferService.GetTransferById(transferId);
+
+                                Console.WriteLine(transfer.Amount);
+                                Console.WriteLine(transfer.TransferId);
+                            }
+                            catch (Exception)
+                            {
+                                Console.WriteLine("Invalid Entry. Please try again.");
+                            }
                             
-                    //    }
-                    //}
+                            
+                            break;
+                        }
+
+                    } while (userSelection.ToLower().Trim() != "n" || userSelection.ToLower().Trim() != "no");
                 }
                 else if (menuSelection == 3)
                 {

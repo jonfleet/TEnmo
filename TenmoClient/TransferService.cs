@@ -18,18 +18,22 @@ namespace TenmoClient
         /// </summary>
         /// <param name="action">String to print in prompt. Expected values are "Approve" or "Reject" or "View"</param>
         /// <returns>ID of transfers to view, approve, or reject</returns>
-        public int PromptForTransferID(string action)
+        public Transfer GetTransferById(int transferId)
         {
-            Console.WriteLine("");
-            Console.Write("Please enter transfer ID to " + action + " (0 to cancel): ");
-            if (!int.TryParse(Console.ReadLine(), out int transferId))
+            int userId = UserService.GetUserId();
+            RestRequest request = new RestRequest(TRANSFER_BASE_URL + userId + "/" + transferId);
+            IRestResponse<Transfer> response = client.Get<Transfer>(request);
+            if (response.ResponseStatus != ResponseStatus.Completed)
             {
-                Console.WriteLine("Invalid input. Only input a number.");
-                return 0;
+                throw new HttpRequestException("An error occurred while communicating with the server");
+            }
+            else if (!response.IsSuccessful)
+            {
+                throw new HttpRequestException("Response was unsuccessful: " + (int)response.StatusCode + " " + response.StatusDescription);
             }
             else
             {
-                return transferId;
+                return response.Data;
             }
         }
         public Transfer SendTransfer(decimal amount, int toUserId)
