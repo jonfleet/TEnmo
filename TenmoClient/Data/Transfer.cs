@@ -58,7 +58,9 @@ namespace TenmoClient.Data
             }
         }
         public int FromUserId { get; set; }
+        public string FromUsername { get; set; }
         public int ToUserId { get; set; }
+        public string ToUsername { get; set; }
         public decimal Amount { get; set; }
     }
 }

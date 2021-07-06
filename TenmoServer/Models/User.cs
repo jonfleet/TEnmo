@@ -2,11 +2,22 @@
 {
     public class User
     {
+        
         public int UserId { get; set; }
         public string Username { get; set; }
         public string PasswordHash { get; set; }
         public string Salt { get; set; }
         public string Email { get; set; }
+
+        public User(int userId, string username, string passwordHash, string salt)
+        {
+            UserId = userId;
+            Username = username;
+            PasswordHash = passwordHash;
+            Salt = salt;
+        }
+
+        public User() { }
     }
 
     /// <summary>

@@ -93,30 +93,7 @@ namespace TenmoClient
                 }
                 else if (menuSelection == 2)
                 {
-                    List<Transfer> transfers = transferService.GetTransfers();
-                    int count = 0;
-                    foreach(Transfer transfer in transfers)
-                    {
-                        count++;
-                        Console.WriteLine($"Transfer ID: {count.ToString().PadRight(4)}| Transfer Type: {transfer.TransferTypeDesc.ToString().PadRight(8)}" +
-                            $"| Transfer Status: {transfer.TransferStatusDesc.ToString().PadRight(5)}| From User ID:{transfer.FromUserId.ToString().PadRight(4)}" +
-                            $"| To User ID:{transfer.ToUserId.ToString().PadRight(4)}| {transfer.Amount.ToString("C2")}");
-                    }
-                    //Console.WriteLine("");
-                    //Console.WriteLine("Would you like to look at the details of a specific transfer?");
-                    //Console.WriteLine("If not, please enter 0");
-                    //int userSelection = -1;
-                    //while (userSelection != 0)
-                    //{
-                    //    if (!int.TryParse(Console.ReadLine(), out userSelection))
-                    //    {
-                    //        Console.WriteLine("That wasn't a number! please use the number pad!!");
-                    //    }
-                    //    else if (userSelection <= transfers.Count - 1)
-                    //    {
-                            
-                    //    }
-                    //}
+                    GetTransferMenu();
                 }
                 else if (menuSelection == 3)
                 {
@@ -176,5 +153,61 @@ namespace TenmoClient
 
 
         }       
+
+        private static void GetTransferMenu()
+        {
+            List<Transfer> transfers = transferService.GetTransfers();
+            int count = 0;
+            foreach (Transfer transfer in transfers)
+            {
+                count++;
+
+                Console.Write($"Transfer ID: {transfer.TransferId.ToString().PadRight(4)}");
+                if (UserService.GetUserId() != transfer.FromUserId)
+                {
+                    Console.Write($"| From: {transfer.FromUsername.ToString().PadRight(12)}");
+                }
+                if (UserService.GetUserId() != transfer.ToUserId)
+                {
+                    Console.Write($"| To  : {transfer.ToUsername.ToString().PadRight(12)}");
+                }
+                Console.Write($"| Amount: {transfer.Amount.ToString("C2")}\n");
+            }
+
+            string userSelection;
+            do
+            {
+                Console.WriteLine("");
+                Console.WriteLine("Would you like to look at the details of a specific transfer (Y/N)?");
+                userSelection = Console.ReadLine();
+
+                if (userSelection.ToLower().Trim() == "y" || userSelection.ToLower().Trim() == "yes")
+                {
+                    // GetTransferById 
+                    Console.WriteLine();
+                    Console.WriteLine("Enter the transferId number.");
+
+                    try
+                    {
+                        int transferId = int.Parse(Console.ReadLine());
+                        Transfer transfer = transferService.GetTransferById(transferId);
+
+                        Console.WriteLine("");
+                        Console.WriteLine($"| Transfer ID: {transfer.TransferId.ToString().PadRight(4)}\n" +
+                        $"| Transfer Type: {transfer.TransferTypeDesc.ToString().PadRight(8)}\n" +
+                        $"| Transfer Status: {transfer.TransferStatusDesc.ToString().PadRight(5)}\n" +
+                        $"| From User : {transfer.FromUsername.ToString().PadRight(4)}\n" +
+                        $"| To User : {transfer.ToUsername.ToString().PadRight(4)}\n" +
+                        $"| Amount: {transfer.Amount.ToString("C2")}\n");
+                    }
+                    catch (Exception)
+                    {
+                        Console.WriteLine("Invalid Entry. Please try again.");
+                    }
+                    break;
+                }
+
+            } while (userSelection.ToLower() != "n" && userSelection.ToLower() != "no");
+        }
     }
 }
