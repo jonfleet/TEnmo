@@ -1,12 +1,11 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Transactions;
-using System.IO;
-using System.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
-using TenmoServer;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Collections.Generic;
+using System.Data.SqlClient;
+using System.IO;
+using System.Transactions;
 using TenmoServer.DAO;
 using TenmoServer.Models;
-using System.Collections.Generic;
 
 namespace TenmoServer.Tests
 {
@@ -24,9 +23,16 @@ namespace TenmoServer.Tests
         private readonly User ExpectedNewUser = new User(4, "test4", "", "");
 
         // Sample Transfers
-        private readonly Transfer Transfer1 = new Transfer(1, 2, 2, 1, "test1", 2, "test2", 100.0M);
-        private readonly Transfer Transfer2 = new Transfer(2, 2, 2, 1,"test1", 3, "test3", 200.0M);
-        private readonly Transfer Transfer3 = new Transfer(3, 2, 2, 2, "test2", 3, "test3", 300.0M);
+        private readonly Transfer TransferRequestPending = new Transfer(1, 1, 1, 1, "test1", 2, "test2", 100.0M);
+        private readonly Transfer TransferRequestApproved = new Transfer(1, 1, 2, 1,"test1", 2, "test2", 100.0M);
+        private readonly Transfer TransferRequestRejected = new Transfer(1, 1, 3, 1, "test1", 2, "test2", 100.0M);
+        private readonly Transfer TransferSendPending = new Transfer(1, 2, 1, 1, "test1", 2, "test2", 100.0M);
+        private readonly Transfer TransferSendApproved = new Transfer(1, 2, 2, 1, "test1", 2, "test2", 100.0M);
+        private readonly Transfer TransferSendRejected = new Transfer(1, 2, 3, 1, "test1", 2, "test2", 100.0M);
+
+        private readonly Transfer Transfer2 = new Transfer(2, 1, 2, 1, "test1", 2, "test2", 100.0M);
+        private readonly Transfer Transfer3 = new Transfer(3, 1, 3, 2, "test2", 3, "test3", 300.0M);
+        private readonly Transfer Transfer4 = new Transfer(4, 2, 2, 3, "test3", 1, "test1", 400.0M);
 
         //Sample Balances
         //(1,1, 1000),
@@ -102,16 +108,16 @@ namespace TenmoServer.Tests
         }
 
         [TestMethod]
-        public void GetTransfers_ReturnAllTest2Transfers()
+        public void GetTransfers_ReturnAllUser3Transfers()
         {
             
 
             UserSqlDAO dao = new UserSqlDAO(ConnectionString);
             List<Transfer> expectedTransfers = new List<Transfer>();
-            expectedTransfers.Add(Transfer1);
             expectedTransfers.Add(Transfer3);
+            expectedTransfers.Add(Transfer4);
 
-            List<Transfer> actualTransfers = dao.GetTransfers(2);
+            List<Transfer> actualTransfers = dao.GetTransfers(3);
             if(actualTransfers.Count != expectedTransfers.Count)
             {
                 Assert.Fail("The query did not return the expected number of transfers");
@@ -127,45 +133,106 @@ namespace TenmoServer.Tests
         {
             UserSqlDAO dao = new UserSqlDAO(ConnectionString);
 
-            Transfer actualTransfer1 = dao.GetTransferById(2, 1);
-            Transfer actualTransfer2 = dao.GetTransferById(1, 2);
-            Transfer actualTransfer3 = dao.GetTransferById(3, 3);
+            Transfer actualTransfer2 = dao.GetTransferById(2, 2);
+            Transfer actualTransfer3 = dao.GetTransferById(2, 3);
+            Transfer actualTransfer4 = dao.GetTransferById(3, 4);
             
-            AssertTransferMatch(Transfer1, actualTransfer1);
             AssertTransferMatch(Transfer2, actualTransfer2);
             AssertTransferMatch(Transfer3, actualTransfer3);
+            AssertTransferMatch(Transfer4, actualTransfer4);
             
         }
 
         [TestMethod]
         public void CreateTransfer()
         {
-            UserSqlDAO dao = new UserSqlDAO(ConnectionString);
+            IUserDAO dao = new UserSqlDAO(ConnectionString);
             Transfer newTransfer = new Transfer();
             newTransfer.FromUserId = 1;
             newTransfer.ToUserId = 2;
             newTransfer.Amount = 100;
 
-            Transfer actualTransfer = dao.CreateTransfer(newTransfer, "Send");
+            // Test Request Transfers
+            Transfer actualRequestTransfer = dao.CreateTransfer(newTransfer, "Request");
 
-            // Compare to Sample Transfer 1 excluding transferId
-            Assert.AreEqual(Transfer1.TransferStatusId, actualTransfer.TransferStatusId);
-            Assert.AreEqual(Transfer1.TransferTypeId, actualTransfer.TransferTypeId);
-            Assert.AreEqual(Transfer1.ToUserId, actualTransfer.ToUserId);
-            Assert.AreEqual(Transfer1.FromUserId, actualTransfer.FromUserId);
-            Assert.AreEqual(Transfer1.Amount, actualTransfer.Amount);
+            // Compare excluding transferId
+            Assert.AreEqual(TransferRequestPending.TransferStatusId, actualRequestTransfer.TransferStatusId);
+            Assert.AreEqual(TransferRequestPending.TransferTypeId, actualRequestTransfer.TransferTypeId);
+            Assert.AreEqual(TransferRequestPending.ToUserId, actualRequestTransfer.ToUserId);
+            Assert.AreEqual(TransferRequestPending.FromUserId, actualRequestTransfer.FromUserId);
+            Assert.AreEqual(TransferRequestPending.Amount, actualRequestTransfer.Amount);
+
+            // Test Send Transfer
+            Transfer actualSendTransfer = dao.CreateTransfer(newTransfer, "Send");
+
+            // Compare excluding transferId
+            Assert.AreEqual(TransferSendPending.TransferStatusId, actualSendTransfer.TransferStatusId);
+            Assert.AreEqual(TransferSendPending.TransferTypeId, actualSendTransfer.TransferTypeId);
+            Assert.AreEqual(TransferRequestPending.ToUserId, actualSendTransfer.ToUserId);
+            Assert.AreEqual(TransferRequestPending.FromUserId, actualSendTransfer.FromUserId);
+            Assert.AreEqual(TransferRequestPending.Amount, actualSendTransfer.Amount);
+
+        }
+
+        [TestMethod]
+        public void ApproveRequestTransfer()
+        {
+            IUserDAO dao = new UserSqlDAO(ConnectionString);
+
+            // Test Approval of TransferRequestPending
+            Transfer actualRequestApproved = dao.ApproveTransfer(TransferRequestPending);
+
+            Assert.AreEqual(TransferRequestApproved.TransferStatusId, actualRequestApproved.TransferStatusId);
+            Assert.AreEqual(TransferRequestApproved.TransferTypeId, actualRequestApproved.TransferTypeId);
+            Assert.AreEqual(TransferRequestApproved.ToUserId, actualRequestApproved.ToUserId);
+            Assert.AreEqual(TransferRequestApproved.FromUserId, actualRequestApproved.FromUserId);
+            Assert.AreEqual(TransferRequestApproved.Amount, actualRequestApproved.Amount);
+
 
             // Check to make sure proper amount is withdrawn and deposited
             Balance actualUser1Balance = dao.GetBalance(1);
-            decimal expectedUser1Balance = Balance1.PrimaryBalance - newTransfer.Amount;
+            decimal expectedUser1Balance = Balance1.PrimaryBalance - TransferRequestPending.Amount;
 
             Assert.AreEqual(expectedUser1Balance, actualUser1Balance.PrimaryBalance);
 
             Balance actualUser2Balance = dao.GetBalance(2);
-            decimal expectedUser2Balance = Balance2.PrimaryBalance + newTransfer.Amount;
+            decimal expectedUser2Balance = Balance2.PrimaryBalance + TransferRequestPending.Amount;
 
             Assert.AreEqual(expectedUser2Balance, actualUser2Balance.PrimaryBalance);
 
+        }
+
+        [TestMethod]
+        public void ApproveSendTransfer()
+        {
+            IUserDAO dao = new UserSqlDAO(ConnectionString);
+
+            // Test Approval of TransferRequestPending
+            Transfer actualSendApproved = dao.ApproveTransfer(TransferSendPending);
+
+            Assert.AreEqual(TransferRequestApproved.TransferStatusId, actualSendApproved.TransferStatusId);
+            Assert.AreEqual(TransferRequestApproved.TransferTypeId, actualSendApproved.TransferTypeId);
+            Assert.AreEqual(TransferRequestApproved.ToUserId, actualSendApproved.ToUserId);
+            Assert.AreEqual(TransferRequestApproved.FromUserId, actualSendApproved.FromUserId);
+            Assert.AreEqual(TransferRequestApproved.Amount, actualSendApproved.Amount);
+
+
+            // Check to make sure proper amount is withdrawn and deposited
+            Balance actualUser1Balance = dao.GetBalance(1);
+            decimal expectedUser1Balance = Balance1.PrimaryBalance - TransferSendPending.Amount;
+
+            Assert.AreEqual(expectedUser1Balance, actualUser1Balance.PrimaryBalance);
+
+            Balance actualUser2Balance = dao.GetBalance(2);
+            decimal expectedUser2Balance = Balance2.PrimaryBalance + TransferSendPending.Amount;
+
+            Assert.AreEqual(expectedUser2Balance, actualUser2Balance.PrimaryBalance);
+        }
+
+        [TestMethod]
+        public void RejectTransfer()
+        {
+            Assert.Fail();
         }
        
         private void AssertTransferMatch(Transfer expected, Transfer actual)

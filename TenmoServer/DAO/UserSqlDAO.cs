@@ -163,15 +163,6 @@ namespace TenmoServer.DAO
                 using (SqlConnection conny = new SqlConnection(connectionString))
                 {
 
-                //    TransferId = Convert.ToInt32(reader["transfer_id"]),
-                //TransferTypeId = Convert.ToInt32(reader["transfer_type_id"]),
-                //TransferStatusId = Convert.ToInt32(reader["transfer_status_id"]),
-                //FromUserId = Convert.ToInt32(reader["account_from"]),
-                //ToUserId = Convert.ToInt32(reader["account_to"]),
-                //Amount = Convert.ToDecimal(reader["amount"]),
-                //ToUsername = Convert.ToString(reader["u_to.username"]),
-                //FromUsername = Convert.ToString(reader["u_from.username"])
-
                     conny.Open();
                     SqlCommand cmd = new SqlCommand("select transfer_id, transfer_type_id, transfer_status_id, account_from, account_to, amount, u_to.username as to_username, u_from.username as from_username " +
                         "from transfers as t " +
@@ -203,8 +194,74 @@ namespace TenmoServer.DAO
             }
             return transfer;
         }
+        public List<Transfer> GetPendingTransfersForUser(int userId)
+        {
+            List<Transfer> pendingTransfers = new List<Transfer>();
+            try
+            {
+                using (SqlConnection conny = new SqlConnection(connectionString))
+                {
+                    conny.Open();
+
+                    SqlCommand cmd = new SqlCommand("select transfer_id, transfer_type_id, transfer_status_id, account_from, account_to, amount, u_to.username as to_username, u_from.username as from_username from transfers as t " +
+                    "join accounts as a on a.account_id = t.account_from " +
+                    "join users as u_from on u_from.user_id = t.account_from " +
+                    "join users as u_to on u_to.user_id = t.account_to " +
+                    "where (t.transfer_status_id = (select transfer_status_id from transfer_statuses where transfer_status_desc = 'Pending')) and " +
+                    "(t.account_from = (select user_id from users where user_id = @userId));", conny);
+                    cmd.Parameters.AddWithValue("@userId", userId);
+
+                }
+            }
+            catch(Exception e)
+            {
+                throw e;
+            }
+            return pendingTransfers;
+        }
 
         public Transfer CreateTransfer(Transfer transfer, string transferType)
+        {
+            try
+            {
+                using (SqlConnection conny = new SqlConnection(connectionString))
+                {
+                    conny.Open();                   
+
+                    // Create new Transaction
+                    SqlCommand cmd = new SqlCommand("Insert into transfers(transfer_type_id, transfer_status_id, account_from, account_to, amount) " +
+                        "OUTPUT INSERTED.transfer_id, INSERTED.transfer_status_id, INSERTED.transfer_type_id " +
+                        "values " +
+                        "(" +
+                        "   (select transfer_type_id from transfer_types where transfer_type_desc = @transferType), " +
+                        "   (select transfer_status_id from transfer_statuses where transfer_status_desc = 'Pending'), " +
+                        "   @fromUser, " +
+                        "   @toUser, " +
+                        "   @amount" +
+                        ");", conny);
+                    cmd.Parameters.AddWithValue("@transferType", transferType);
+                    cmd.Parameters.AddWithValue("@fromUser", transfer.FromUserId);
+                    cmd.Parameters.AddWithValue("@toUser", transfer.ToUserId);
+                    cmd.Parameters.AddWithValue("@amount", transfer.Amount);
+
+                    SqlDataReader newReader = cmd.ExecuteReader();
+                    while (newReader.Read())
+                    {
+                        transfer.TransferId = Convert.ToInt32(newReader["transfer_id"]);
+                        transfer.TransferStatusId = Convert.ToInt32(newReader["transfer_status_id"]);
+                        transfer.TransferTypeId = Convert.ToInt32(newReader["transfer_type_id"]);
+                    }
+                    
+                }
+            }
+            catch (Exception e)
+            {
+
+                throw e;
+            }
+            return transfer;
+        }
+        public Transfer ApproveTransfer(Transfer transfer)
         {
             try
             {
@@ -220,16 +277,16 @@ namespace TenmoServer.DAO
                     decimal currentBalance = 0;
                     if (reader.Read())
                     {
-                        currentBalance = Convert.ToDecimal(reader["balance"]); 
+                        currentBalance = Convert.ToDecimal(reader["balance"]);
                     }
                     reader.Close();
                     // Throw Error if balance is not enough to complete transfer
-                    if(currentBalance <= transfer.Amount)
+                    if (currentBalance <= transfer.Amount)
                     {
                         conny.Close();
                         throw new InsufficientBalanceException();
                     }
-                    
+
 
                     // Decrement FromUserBalance
                     SqlCommand decrementCommand = new SqlCommand(
@@ -255,31 +312,20 @@ namespace TenmoServer.DAO
 
                     incrementCommand.ExecuteScalar();
 
-                    // Create new Transaction
-                    SqlCommand cmd = new SqlCommand("Insert into transfers(transfer_type_id, transfer_status_id, account_from, account_to, amount) " +
-                        "OUTPUT INSERTED.transfer_id, INSERTED.transfer_status_id, INSERTED.transfer_type_id " +
-                        "values " +
-                        "(" +
-                        "   (select transfer_type_id from transfer_types where transfer_type_desc = @transferType), " +
-                        "   (select transfer_status_id from transfer_statuses where transfer_status_desc = 'Approved'), " +
-                        "   @fromUser, " +
-                        "   @toUser, " +
-                        "   @amount" +
-                        ");", conny);
-                    cmd.Parameters.AddWithValue("@transferType", transferType);
-                    cmd.Parameters.AddWithValue("@transferStatus", "Approved");
-                    cmd.Parameters.AddWithValue("@fromUser", transfer.FromUserId);
-                    cmd.Parameters.AddWithValue("@toUser", transfer.ToUserId);
-                    cmd.Parameters.AddWithValue("@amount", transfer.Amount);
+                    //Update Transaction to "Approved"
+                    SqlCommand cmd = new SqlCommand("update transfers set transfer_status_id = " +
+                        "(select transfer_status_id from transfer_statuses where transfer_status_desc = 'Approved') " +
+                        "OUTPUT inserted.transfer_status_id " +
+                        "where transfer_id = @transferId;", conny);
+                    cmd.Parameters.AddWithValue("@transferId", transfer.TransferId);
+                    //cmd.Parameters.AddWithValue("@transferType", transferType);
 
                     SqlDataReader newReader = cmd.ExecuteReader();
-                    while (newReader.Read())
+                    if (newReader.Read())
                     {
-                        transfer.TransferId = Convert.ToInt32(newReader["transfer_id"]);
                         transfer.TransferStatusId = Convert.ToInt32(newReader["transfer_status_id"]);
-                        transfer.TransferTypeId = Convert.ToInt32(newReader["transfer_type_id"]);
-                    }
-                    
+                        
+                    } 
                 }
             }
             catch (Exception e)
@@ -289,6 +335,30 @@ namespace TenmoServer.DAO
             }
             return transfer;
         }
+        public Transfer RejectTransfer(Transfer transfer)
+        {
+            try
+            {
+                using (SqlConnection conny = new SqlConnection(connectionString))
+                {
+                    conny.Open();
+
+                    //Update Transaction to "Rejected"
+                    SqlCommand cmd = new SqlCommand("update transfers set transfer_status_id = 3 " +
+                        "where transfer_id = @transferId;", conny);
+                    cmd.Parameters.AddWithValue("@transferId", transfer.TransferId);
+
+                    cmd.ExecuteScalar();
+                }
+            }
+            catch (Exception e)
+            {
+
+                throw e;
+            }
+            return transfer;
+        }
+
 
         public Balance GetBalance(int userId)
         {
@@ -344,6 +414,6 @@ namespace TenmoServer.DAO
             };
             return transfer;
         }
-        
+
     }
 }

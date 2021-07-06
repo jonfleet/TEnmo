@@ -42,13 +42,15 @@ namespace TenmoServer.Controllers
 
 
         [HttpPost("send")]
-        public ActionResult<Transfer> SendPayment(Transfer transfer = null)
+        public ActionResult<Transfer> SendTransfer(Transfer transfer = null)
         {
             // Sends payment to the specified user {toUserId}
             try
             {
-                Transfer completedPayment = userDao.CreateTransfer(transfer, "Send");
-                return Ok(completedPayment);
+                Transfer sentTransfer = userDao.CreateTransfer(transfer, "Send");
+                Transfer completedTransfer = userDao.ApproveTransfer(sentTransfer);
+                
+                return Ok(completedTransfer);
             }
             catch (InsufficientBalanceException)
             {
@@ -61,32 +63,54 @@ namespace TenmoServer.Controllers
         }
 
         [HttpPost("request/{fromUserId}")]
-        public void RequestPayment()
+        public ActionResult<Transfer> RequestTransfer(Transfer transfer = null)
         {
-            // Requests Payment from specified user {fromUserId}
+            try
+            {
+                Transfer pendingTransfer = userDao.CreateTransfer(transfer, "Request");
+                
+                return Ok(pendingTransfer);
+            }
+            catch (Exception)
+            {
+                return NotFound();
+            }
         }
-        [HttpGet("pending")]
-        public void GetPendingTransactions()
+
+        [HttpPut("approve/{transferId}")]
+        public ActionResult<Transfer> ApproveTransfer(Transfer transfer = null)
         {
-            // Returns all pending transactions
+            try
+            {
+                Transfer approvedTransfer = userDao.ApproveTransfer(transfer);
+                return Ok(approvedTransfer);
+            }
+            catch (Exception)
+            {
+                return NotFound();                
+            }
+        }
+
+        [HttpPut("reject/{transferId}")]
+        public ActionResult<Transfer> RejectTransfer(Transfer transfer)
+        {
+            try
+            {
+                Transfer rejectedTransfer = userDao.RejectTransfer(transfer);
+                return Ok(rejectedTransfer);
+            }
+            catch (Exception)
+            {
+                return NotFound();
+            }
         }
 
         [HttpGet("completed")]
-        public void GetCompletedTransactions()
+        public void GetCompletedTransfer()
         {
             // Returns all completed Transactions
         }
 
-        [HttpPost("approve/{transferId}")]
-        public void ApproveTransfer()
-        {
-            // Approve Transfer by {transferId}
-        }
-
-        [HttpPost("reject/{transferId}")]
-        public void RejectTransfer()
-        {
-            // reject transfer by {transferId}
-        }
+        
     }
 }

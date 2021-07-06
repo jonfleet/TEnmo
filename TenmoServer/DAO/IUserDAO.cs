@@ -12,7 +12,11 @@ namespace TenmoServer.DAO
        
         List<Transfer> GetTransfers(int userId);
         Transfer GetTransferById(int userId, int transferId);
-
+        List<Transfer> GetPendingTransfersForUser(int userId);
         Transfer CreateTransfer(Transfer payment, string transferType);
+
+        Transfer ApproveTransfer(Transfer transfer);
+        Transfer RejectTransfer(Transfer transfer);
+
     }
 }
