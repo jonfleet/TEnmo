@@ -232,6 +232,11 @@ namespace TenmoServer.DAO
 
         public Transfer CreateTransfer(Transfer transfer, string transferType)
         {
+            if(transfer.Amount < 0)
+            {
+                throw new Exception();
+            }
+
             try
             {
                 using (SqlConnection conny = new SqlConnection(connectionString))
