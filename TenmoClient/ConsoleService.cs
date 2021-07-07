@@ -138,7 +138,7 @@ namespace TenmoClient
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                Console.WriteLine("Invalid Entry");
             }
 
 
@@ -188,6 +188,13 @@ namespace TenmoClient
                         int transferId = int.Parse(Console.ReadLine());
                         Transfer transfer = transferService.GetTransferById(transferId);
 
+
+                        if (transfer == null)
+                        {
+                            Console.WriteLine("TransferId Not valid");
+                            break;
+                        }
+
                         Console.WriteLine("");
                         Console.WriteLine($"| Transfer ID: {transfer.TransferId.ToString().PadRight(4)}\n" +
                         $"| Transfer Type: {transfer.TransferTypeDesc.ToString().PadRight(8)}\n" +
@@ -210,49 +217,59 @@ namespace TenmoClient
         {
             List<Transfer> transfers = transferService.GetPendingTransfers();
             ListTransfers(transfers);
-            string userSelection;
-            Console.WriteLine("");
-            Console.WriteLine("Would you like to approve/reject a specific transfer (Y/N)?");
-            userSelection = Console.ReadLine();
 
-            if (userSelection.ToLower().Trim() == "y" || userSelection.ToLower().Trim() == "yes")
+            if(transfers.Count == 0)
             {
-                // GetTransferById 
-                Console.WriteLine();
-                Console.WriteLine("Enter the transferId number.");
+                Console.WriteLine("");
+                Console.WriteLine("There are no pending transfers.");
+                
+            } else
+            {
+                string userSelection;
+                Console.WriteLine("");
+                Console.WriteLine("Would you like to approve/reject a specific transfer (Y/N)?");
+                userSelection = Console.ReadLine();
 
-                try
+                if (userSelection.ToLower().Trim() == "y" || userSelection.ToLower().Trim() == "yes")
                 {
-                    int transferId = int.Parse(Console.ReadLine());
-                    Transfer transfer = transferService.GetTransferById(transferId);
+                    // GetTransferById 
+                    Console.WriteLine();
+                    Console.WriteLine("Enter the transferId number.");
 
-                    Console.WriteLine("");
-                    Console.WriteLine($"| Transfer ID: {transfer.TransferId.ToString().PadRight(4)}\n" +
-                    $"| Transfer Type: {transfer.TransferTypeDesc.ToString().PadRight(8)}\n" +
-                    $"| Transfer Status: {transfer.TransferStatusDesc.ToString().PadRight(5)}\n" +
-                    $"| From User : {transfer.FromUsername.ToString().PadRight(4)}\n" +
-                    $"| To User : {transfer.ToUsername.ToString().PadRight(4)}\n" +
-                    $"| Amount: {transfer.Amount.ToString("C2")}\n");
-                    //Prompt for approval
-                    Console.WriteLine("");
-                    Console.WriteLine("Would you like to Approve or Reject this transfer?");
-                    userSelection = Console.ReadLine();
-                    if (userSelection.ToLower().Trim() == "a" || userSelection.ToLower().Trim() == "approve")
+                    try
                     {
-                        transferService.ApproveTransfer(transfer);
-                        Console.WriteLine("Your money has been sent!");
+                        int transferId = int.Parse(Console.ReadLine());
+                        Transfer transfer = transferService.GetTransferById(transferId);
+
+                        Console.WriteLine("");
+                        Console.WriteLine($"| Transfer ID: {transfer.TransferId.ToString().PadRight(4)}\n" +
+                        $"| Transfer Type: {transfer.TransferTypeDesc.ToString().PadRight(8)}\n" +
+                        $"| Transfer Status: {transfer.TransferStatusDesc.ToString().PadRight(5)}\n" +
+                        $"| From User : {transfer.FromUsername.ToString().PadRight(4)}\n" +
+                        $"| To User : {transfer.ToUsername.ToString().PadRight(4)}\n" +
+                        $"| Amount: {transfer.Amount.ToString("C2")}\n");
+                        //Prompt for approval
+                        Console.WriteLine("");
+                        Console.WriteLine("Would you like to Approve or Reject this transfer?");
+                        userSelection = Console.ReadLine();
+                        if (userSelection.ToLower().Trim() == "a" || userSelection.ToLower().Trim() == "approve")
+                        {
+                            transferService.ApproveTransfer(transfer);
+                            Console.WriteLine("Your money has been sent!");
+                        }
+                        else if (userSelection.ToLower().Trim() == "r" || userSelection.ToLower().Trim() == "reject")
+                        {
+                            transferService.RejectTransfer(transfer);
+                            Console.WriteLine("Yeah! They don't need your money anyways!");
+                        }
                     }
-                    else if (userSelection.ToLower().Trim() == "r" || userSelection.ToLower().Trim() == "reject")
+                    catch (Exception e)
                     {
-                        transferService.RejectTransfer(transfer);
-                        Console.WriteLine("Yeah! They don't need your money anyways!");
+                        Console.WriteLine("Invalid Entry. Please try again.");
                     }
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("Invalid Entry. Please try again.");
                 }
             }
+           
             
         }
         
