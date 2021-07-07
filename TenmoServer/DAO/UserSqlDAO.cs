@@ -349,6 +349,7 @@ namespace TenmoServer.DAO
         {
             try
             {
+                
                 using (SqlConnection conny = new SqlConnection(connectionString))
                 {
                     conny.Open();
@@ -429,6 +430,32 @@ namespace TenmoServer.DAO
                 FromUsername = Convert.ToString(reader["from_username"])
             };
             return transfer;
+        }
+        public void CheckUnauthorizedApproval(Transfer transfer)
+        {
+            try
+            {
+                using(SqlConnection conny = new SqlConnection(connectionString))
+                {
+                    conny.Open();
+
+                    SqlCommand cmd = new SqlCommand("select * from transfers where transfer_id = @transferId and account_to = @toUserId", conny);
+                    cmd.Parameters.AddWithValue("@transferId", transfer.TransferId);
+                    cmd.Parameters.AddWithValue("@toUserId", transfer.ToUserId);
+
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    if(reader.HasRows)
+                    {
+                        conny.Close();
+                        throw new StopTryingToApproveYourRequestException();
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+
+                throw e;
+            }
         }
 
     }

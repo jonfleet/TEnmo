@@ -12,7 +12,6 @@ namespace TenmoServer.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    //[Authorize]
     public class TransferController : ControllerBase
     {
         private readonly IUserDAO userDao;
@@ -82,11 +81,16 @@ namespace TenmoServer.Controllers
         {
             try
             {
+                userDao.CheckUnauthorizedApproval(transfer);
                 Transfer approvedTransfer = userDao.ApproveTransfer(transfer);
                 return Ok(approvedTransfer);
             }
-            catch (Exception)
+            catch(StopTryingToApproveYourRequestException)
             {
+                return StatusCode(401);
+            }
+            catch (Exception)
+            {                
                 return NotFound();                
             }
         }
@@ -96,8 +100,13 @@ namespace TenmoServer.Controllers
         {
             try
             {
+                userDao.CheckUnauthorizedApproval(transfer);
                 Transfer rejectedTransfer = userDao.RejectTransfer(transfer);
                 return Ok(rejectedTransfer);
+            }
+            catch (StopTryingToApproveYourRequestException)
+            {
+                return StatusCode(401);
             }
             catch (Exception)
             {

@@ -233,8 +233,7 @@ namespace TenmoClient
                     $"| From User : {transfer.FromUsername.ToString().PadRight(4)}\n" +
                     $"| To User : {transfer.ToUsername.ToString().PadRight(4)}\n" +
                     $"| Amount: {transfer.Amount.ToString("C2")}\n");
-
-                    //need to add approve method!!!!
+                    //Prompt for approval
                     Console.WriteLine("");
                     Console.WriteLine("Would you like to Approve or Reject this transfer?");
                     userSelection = Console.ReadLine();
@@ -251,7 +250,7 @@ namespace TenmoClient
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine("Invalid Entry. Please try again." + e);
+                    Console.WriteLine("Invalid Entry. Please try again.");
                 }
             }
             
