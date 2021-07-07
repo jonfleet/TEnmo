@@ -103,11 +103,8 @@ namespace TenmoClient
         }
         public Transfer RequestTransfer(decimal amount, int fromUserId)
         {
-            RestRequest request = new RestRequest(API_BASE_URL + "request/" + UserService.GetUserId());
-            Transfer transfer = new Transfer();
-            transfer.ToUserId = UserService.GetUserId();
-            transfer.FromUserId = fromUserId;
-            transfer.Amount = amount;
+            RestRequest request = new RestRequest(TRANSFER_BASE_URL + "request/" + UserService.GetUserId());
+            Transfer transfer = new Transfer( 1, 1, fromUserId, UserService.GetUserId(), amount);
             request.AddJsonBody(transfer);
             IRestResponse<Transfer> response = client.Post<Transfer>(request);
             if (response.ResponseStatus != ResponseStatus.Completed)
@@ -123,10 +120,11 @@ namespace TenmoClient
                 return transfer;
             }
         }
-        public Transfer ApproveTransfer(int transferId)
+        public Transfer ApproveTransfer(Transfer transfer)
         {
-            Transfer transfer = null;
-            RestRequest request = new RestRequest(API_BASE_URL + "approve/" + transferId);
+            
+            RestRequest request = new RestRequest(TRANSFER_BASE_URL + "approve/" + transfer.TransferId);
+            request.AddJsonBody(transfer);
             IRestResponse<Transfer> response = client.Put<Transfer>(request);
             if (response.ResponseStatus != ResponseStatus.Completed)
             {
@@ -138,13 +136,14 @@ namespace TenmoClient
             }
             else
             {
-                return transfer;
+                return response.Data;
             }
         }
-        public Transfer RejectTransfer(int transferId)
+        public Transfer RejectTransfer(Transfer transfer)
         {
-            Transfer transfer = null;
-            RestRequest request = new RestRequest(API_BASE_URL + "reject/" + transferId);
+            
+            RestRequest request = new RestRequest(TRANSFER_BASE_URL + "reject/" + transfer.TransferId);
+            request.AddJsonBody(transfer);
             IRestResponse<Transfer> response = client.Put<Transfer>(request);
             if (response.ResponseStatus != ResponseStatus.Completed)
             {
@@ -156,7 +155,7 @@ namespace TenmoClient
             }
             else
             {
-                return transfer;
+                return response.Data;
             }
         }
 

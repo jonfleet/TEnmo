@@ -211,6 +211,16 @@ namespace TenmoServer.DAO
                     "(t.account_from = (select user_id from users where user_id = @userId));", conny);
                     cmd.Parameters.AddWithValue("@userId", userId);
 
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    if (reader.HasRows)
+                    {
+                        while (reader.Read())
+                        {
+                            Transfer t = GetTransferFromReader(reader);
+                            pendingTransfers.Add(t);
+                        }
+                    }
                 }
             }
             catch(Exception e)
