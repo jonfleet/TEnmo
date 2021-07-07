@@ -30,9 +30,11 @@ namespace TenmoServer.Tests
         private readonly Transfer TransferSendApproved = new Transfer(1, 2, 2, 1, "test1", 2, "test2", 100.0M);
         private readonly Transfer TransferSendRejected = new Transfer(1, 2, 3, 1, "test1", 2, "test2", 100.0M);
 
+        private readonly Transfer Transfer1 = new Transfer(1, 1, 1, 1, "test1", 2, "test2", 100.0M);
         private readonly Transfer Transfer2 = new Transfer(2, 1, 2, 1, "test1", 2, "test2", 100.0M);
         private readonly Transfer Transfer3 = new Transfer(3, 1, 3, 2, "test2", 3, "test3", 300.0M);
         private readonly Transfer Transfer4 = new Transfer(4, 2, 2, 3, "test3", 1, "test1", 400.0M);
+        private readonly Transfer Transfer5 = new Transfer(5, 1, 1, 1, "test1", 3, "test3", 500.0M);
 
         //Sample Balances
         //(1,1, 1000),
@@ -116,6 +118,7 @@ namespace TenmoServer.Tests
             List<Transfer> expectedTransfers = new List<Transfer>();
             expectedTransfers.Add(Transfer3);
             expectedTransfers.Add(Transfer4);
+            expectedTransfers.Add(Transfer5);
 
             List<Transfer> actualTransfers = dao.GetTransfers(3);
             if(actualTransfers.Count != expectedTransfers.Count)
@@ -258,6 +261,26 @@ namespace TenmoServer.Tests
             Assert.AreEqual(TransferSendRejected.Amount, actualSendRejected.Amount);
         }
        
+        [TestMethod]
+        public void GetPendingTransfersForUser()
+        {
+            IUserDAO dao = new UserSqlDAO(ConnectionString);
+
+            List<Transfer> expectedPendingTransfers = new List<Transfer>();
+            expectedPendingTransfers.Add(Transfer1);
+            expectedPendingTransfers.Add(Transfer5);
+
+            List<Transfer> actualPendingTransfers = dao.GetPendingTransfersForUser(1);
+            if(actualPendingTransfers.Count != expectedPendingTransfers.Count)
+            {
+                Assert.Fail("The query did not return the expected number of transfers");
+            }
+            for(int i = 0; i < expectedPendingTransfers.Count; i++)
+            {
+                AssertTransferMatch(expectedPendingTransfers[i], actualPendingTransfers[i]);
+            }
+            
+        }
         private void AssertTransferMatch(Transfer expected, Transfer actual)
         {
             Assert.AreEqual(expected.TransferId, actual.TransferId);

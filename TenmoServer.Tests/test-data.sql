@@ -46,7 +46,8 @@ INSERT INTO transfers (transfer_id, transfer_type_id, transfer_status_id, accoun
 VALUES (1, 1, 1, 1 , 2, 100),
 	   (2, 1, 2, 1 , 2 , 100),
 	   (3, 1, 3, 2, 3, 300),
-	   (4, 2, 2, 3, 1, 400);
+	   (4, 2, 2, 3, 1, 400),
+	   (5, 1, 1, 1, 3, 500);
 SET IDENTITY_INSERT transfers OFF;
 
 
