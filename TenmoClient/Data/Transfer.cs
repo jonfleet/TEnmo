@@ -62,5 +62,14 @@ namespace TenmoClient.Data
         public int ToUserId { get; set; }
         public string ToUsername { get; set; }
         public decimal Amount { get; set; }
+        public Transfer() { }
+        public Transfer(int transferTypeId, int transferStatusId, int fromUserId, int toUserId, decimal amount)
+        {
+            TransferTypeId = transferTypeId;
+            TransferStatusId = transferStatusId;
+            FromUserId = fromUserId;
+            ToUserId = toUserId;
+            Amount = amount;
+        }
     }
 }

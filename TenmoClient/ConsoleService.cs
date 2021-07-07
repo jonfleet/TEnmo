@@ -151,6 +151,7 @@ namespace TenmoClient
 
             Console.WriteLine();
             Console.WriteLine("Please enter the amount you would like to request: ");
+            //non-integer exception handling with that parse needed
             decimal amount = decimal.Parse(Console.ReadLine().Trim());
             try
             {
@@ -239,16 +240,18 @@ namespace TenmoClient
                     userSelection = Console.ReadLine();
                     if (userSelection.ToLower().Trim() == "a" || userSelection.ToLower().Trim() == "approve")
                     {
-                        transferService.ApproveTransfer(transfer.TransferId);
+                        transferService.ApproveTransfer(transfer);
+                        Console.WriteLine("Your money has been sent!");
                     }
                     else if (userSelection.ToLower().Trim() == "r" || userSelection.ToLower().Trim() == "reject")
                     {
-                        transferService.RejectTransfer(transfer.TransferId);
+                        transferService.RejectTransfer(transfer);
+                        Console.WriteLine("Yeah! They don't need your money anyways!");
                     }
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
-                    Console.WriteLine("Invalid Entry. Please try again.");
+                    Console.WriteLine("Invalid Entry. Please try again." + e);
                 }
             }
             
