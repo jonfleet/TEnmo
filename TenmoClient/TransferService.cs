@@ -130,6 +130,10 @@ namespace TenmoClient
             {
                 throw new HttpRequestException("An error occurred while communicating with the server");
             }
+            else if((int)response.StatusCode == 401)
+            {
+                throw new HttpRequestException("Unauthorized, quit trying to steal");
+            }
             else if (!response.IsSuccessful)
             {
                 throw new HttpRequestException("Response was unsuccessful: " + (int)response.StatusCode + " " + response.StatusDescription);
@@ -148,6 +152,10 @@ namespace TenmoClient
             if (response.ResponseStatus != ResponseStatus.Completed)
             {
                 throw new HttpRequestException("An error occurred while communicating with the server");
+            }
+            else if ((int)response.StatusCode == 401)
+            {
+                throw new HttpRequestException("Unauthorized, quit trying to steal");
             }
             else if (!response.IsSuccessful)
             {
