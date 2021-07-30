@@ -17,7 +17,6 @@ namespace TenmoServer.DAO
 
         Transfer ApproveTransfer(Transfer transfer);
         Transfer RejectTransfer(Transfer transfer);
-        public void CheckUnauthorizedApproval(Transfer transfer);
 
     }
 }

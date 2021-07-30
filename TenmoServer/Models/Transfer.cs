@@ -15,7 +15,7 @@ namespace TenmoServer.Models
         public int ToUserId { get; set; }
         public string ToUsername { get; set; }
         public decimal Amount { get; set; }
-
+        
         public Transfer(int transferId, int transferTypeId, int tansferStatusId, int fromUserId, string fromUsername, int toUserId, string toUsername, decimal amount)
         {
             TransferId = transferId;

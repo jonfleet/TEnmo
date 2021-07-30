@@ -132,7 +132,7 @@ namespace TenmoClient
             }
             else if((int)response.StatusCode == 401)
             {
-                throw new HttpRequestException("Unauthorized, quit trying to steal");
+                throw new HttpRequestException("Unauthorized");
             }
             else if (!response.IsSuccessful)
             {
@@ -155,7 +155,7 @@ namespace TenmoClient
             }
             else if ((int)response.StatusCode == 401)
             {
-                throw new HttpRequestException("Unauthorized, quit trying to steal");
+                throw new HttpRequestException("Unauthorized");
             }
             else if (!response.IsSuccessful)
             {

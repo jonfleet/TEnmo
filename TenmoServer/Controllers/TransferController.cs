@@ -15,18 +15,15 @@ namespace TenmoServer.Controllers
     public class TransferController : ControllerBase
     {
         private readonly IUserDAO userDao;
-
         public TransferController(IUserDAO _userDao)
         {
             userDao = _userDao;
         }
 
 
-
         [HttpGet("{userId}/{transferId}")]
         public ActionResult<Transfer> GetTransferById(int userId, int transferId)
         {
-
             // Get a single transfer based on Id
             try
             {
@@ -81,14 +78,10 @@ namespace TenmoServer.Controllers
         {
             try
             {
-                userDao.CheckUnauthorizedApproval(transfer);
                 Transfer approvedTransfer = userDao.ApproveTransfer(transfer);
                 return Ok(approvedTransfer);
             }
-            catch(StopTryingToApproveYourRequestException)
-            {
-                return StatusCode(401);
-            }
+            
             catch (Exception)
             {                
                 return NotFound();                
@@ -100,13 +93,8 @@ namespace TenmoServer.Controllers
         {
             try
             {
-                userDao.CheckUnauthorizedApproval(transfer);
                 Transfer rejectedTransfer = userDao.RejectTransfer(transfer);
                 return Ok(rejectedTransfer);
-            }
-            catch (StopTryingToApproveYourRequestException)
-            {
-                return StatusCode(401);
             }
             catch (Exception)
             {
@@ -114,12 +102,5 @@ namespace TenmoServer.Controllers
             }
         }
 
-        [HttpGet("completed")]
-        public void GetCompletedTransfer()
-        {
-            // Returns all completed Transactions
-        }
-
-        
     }
 }

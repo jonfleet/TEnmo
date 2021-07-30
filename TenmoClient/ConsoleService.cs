@@ -250,7 +250,7 @@ namespace TenmoClient
                         $"| Amount: {transfer.Amount.ToString("C2")}\n");
                         //Prompt for approval
                         Console.WriteLine("");
-                        Console.WriteLine("Would you like to Approve or Reject this transfer?");
+                        Console.WriteLine("Would you like to Approve or Reject this transfer? (A/R)");
                         userSelection = Console.ReadLine();
                         if (userSelection.ToLower().Trim() == "a" || userSelection.ToLower().Trim() == "approve")
                         {
@@ -260,7 +260,7 @@ namespace TenmoClient
                         else if (userSelection.ToLower().Trim() == "r" || userSelection.ToLower().Trim() == "reject")
                         {
                             transferService.RejectTransfer(transfer);
-                            Console.WriteLine("Yeah! They don't need your money anyways!");
+                            Console.WriteLine("Transfer Rejected!");
                         }
                     }
                     catch (Exception e)

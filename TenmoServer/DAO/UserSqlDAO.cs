@@ -120,9 +120,9 @@ namespace TenmoServer.DAO
 
             try
             {
-                using (SqlConnection conny = new SqlConnection(connectionString))
+                using (SqlConnection conn = new SqlConnection(connectionString))
                 {
-                    conny.Open();
+                    conn.Open();
                     SqlCommand cmd = new SqlCommand("select transfer_id, transfer_type_id, transfer_status_id, account_from, account_to, amount, u_to.username as to_username, u_from.username as from_username " +
                         "from transfers as t " +
                         "join accounts as a " +
@@ -133,7 +133,7 @@ namespace TenmoServer.DAO
                         "on u_to.user_id = t.account_to " +
                         "where " +
                         "(t.account_from = (select user_id from users where user_id = @userId)) " +
-                        "or(t.account_to = (select user_id from users where user_id = @userId))", conny);
+                        "or(t.account_to = (select user_id from users where user_id = @userId))", conn);
                     cmd.Parameters.AddWithValue("@userId", userId);
                     SqlDataReader reader = cmd.ExecuteReader();
                     
@@ -160,10 +160,10 @@ namespace TenmoServer.DAO
             Transfer transfer = null;
             try
             {
-                using (SqlConnection conny = new SqlConnection(connectionString))
+                using (SqlConnection conn = new SqlConnection(connectionString))
                 {
 
-                    conny.Open();
+                    conn.Open();
                     SqlCommand cmd = new SqlCommand("select transfer_id, transfer_type_id, transfer_status_id, account_from, account_to, amount, u_to.username as to_username, u_from.username as from_username " +
                         "from transfers as t " +
                         "join accounts as a " +
@@ -175,7 +175,7 @@ namespace TenmoServer.DAO
                         "where " +
                         "(t.transfer_id = @transferId) and" +
                         "((t.account_from = (select user_id from users where user_id = @userId))" +
-                        "or(t.account_to = (select user_id from users where user_id = @userId)))", conny);
+                        "or(t.account_to = (select user_id from users where user_id = @userId)))", conn);
 
                     cmd.Parameters.AddWithValue( "@transferId", transferId);
                     cmd.Parameters.AddWithValue("@userId", userId);
@@ -199,16 +199,16 @@ namespace TenmoServer.DAO
             List<Transfer> pendingTransfers = new List<Transfer>();
             try
             {
-                using (SqlConnection conny = new SqlConnection(connectionString))
+                using (SqlConnection conn = new SqlConnection(connectionString))
                 {
-                    conny.Open();
+                    conn.Open();
 
                     SqlCommand cmd = new SqlCommand("select transfer_id, transfer_type_id, transfer_status_id, account_from, account_to, amount, u_to.username as to_username, u_from.username as from_username from transfers as t " +
                     "join accounts as a on a.account_id = t.account_from " +
                     "join users as u_from on u_from.user_id = t.account_from " +
                     "join users as u_to on u_to.user_id = t.account_to " +
                     "where (t.transfer_status_id = (select transfer_status_id from transfer_statuses where transfer_status_desc = 'Pending')) and " +
-                    "(t.account_from = (select user_id from users where user_id = @userId));", conny);
+                    "(t.account_from = (select user_id from users where user_id = @userId));", conn);
                     cmd.Parameters.AddWithValue("@userId", userId);
 
                     SqlDataReader reader = cmd.ExecuteReader();
@@ -239,9 +239,9 @@ namespace TenmoServer.DAO
 
             try
             {
-                using (SqlConnection conny = new SqlConnection(connectionString))
+                using (SqlConnection conn = new SqlConnection(connectionString))
                 {
-                    conny.Open();                   
+                    conn.Open();                   
 
                     // Create new Transaction
                     SqlCommand cmd = new SqlCommand("Insert into transfers(transfer_type_id, transfer_status_id, account_from, account_to, amount) " +
@@ -253,7 +253,7 @@ namespace TenmoServer.DAO
                         "   @fromUser, " +
                         "   @toUser, " +
                         "   @amount" +
-                        ");", conny);
+                        ");", conn);
                     cmd.Parameters.AddWithValue("@transferType", transferType);
                     cmd.Parameters.AddWithValue("@fromUser", transfer.FromUserId);
                     cmd.Parameters.AddWithValue("@toUser", transfer.ToUserId);
@@ -280,12 +280,12 @@ namespace TenmoServer.DAO
         {
             try
             {
-                using (SqlConnection conny = new SqlConnection(connectionString))
+                using (SqlConnection conn = new SqlConnection(connectionString))
                 {
-                    conny.Open();
+                    conn.Open();
 
                     // Determine if Sufficient Balance is available
-                    SqlCommand getBalance = new SqlCommand("select balance from accounts where user_id = @fromUser", conny);
+                    SqlCommand getBalance = new SqlCommand("select balance from accounts where user_id = @fromUser", conn);
                     getBalance.Parameters.AddWithValue("@fromUser", transfer.FromUserId);
                     SqlDataReader reader = getBalance.ExecuteReader();
 
@@ -298,7 +298,7 @@ namespace TenmoServer.DAO
                     // Throw Error if balance is not enough to complete transfer
                     if (currentBalance <= transfer.Amount)
                     {
-                        conny.Close();
+                        conn.Close();
                         throw new InsufficientBalanceException();
                     }
 
@@ -310,7 +310,7 @@ namespace TenmoServer.DAO
                             "Update accounts " +
                             "set balance = balance - @withdrawAmount " +
                             "where user_id = @fromUser; " +
-                         "END", conny);
+                         "END", conn);
                     decrementCommand.Parameters.AddWithValue("@withdrawAmount", transfer.Amount);
                     decrementCommand.Parameters.AddWithValue("@fromUser", transfer.FromUserId);
 
@@ -320,7 +320,7 @@ namespace TenmoServer.DAO
                     SqlCommand incrementCommand = new SqlCommand(
                         "Update accounts " +
                         "set balance = balance + @depositAmount " +
-                        "where user_id = @toUser;", conny
+                        "where user_id = @toUser;", conn
                     );
                     incrementCommand.Parameters.AddWithValue("@depositAmount", transfer.Amount);
                     incrementCommand.Parameters.AddWithValue("@toUser", transfer.ToUserId);
@@ -331,7 +331,7 @@ namespace TenmoServer.DAO
                     SqlCommand cmd = new SqlCommand("update transfers set transfer_status_id = " +
                         "(select transfer_status_id from transfer_statuses where transfer_status_desc = 'Approved') " +
                         "OUTPUT inserted.transfer_status_id " +
-                        "where transfer_id = @transferId;", conny);
+                        "where transfer_id = @transferId;", conn);
                     cmd.Parameters.AddWithValue("@transferId", transfer.TransferId);
                     //cmd.Parameters.AddWithValue("@transferType", transferType);
 
@@ -355,15 +355,15 @@ namespace TenmoServer.DAO
             try
             {
                 
-                using (SqlConnection conny = new SqlConnection(connectionString))
+                using (SqlConnection conn = new SqlConnection(connectionString))
                 {
-                    conny.Open();
+                    conn.Open();
 
                     //Update Transaction to "Rejected"
                     SqlCommand cmd = new SqlCommand("update transfers set transfer_status_id = " +
                         "(select transfer_status_id from transfer_statuses where transfer_status_desc = 'Rejected') " +
                         "OUTPUT inserted.transfer_status_id " +
-                        "where transfer_id = @transferId;", conny);
+                        "where transfer_id = @transferId;", conn);
                     cmd.Parameters.AddWithValue("@transferId", transfer.TransferId);
 
                     SqlDataReader reader = cmd.ExecuteReader();
@@ -388,10 +388,10 @@ namespace TenmoServer.DAO
 
             try
             {
-                using (SqlConnection conny = new SqlConnection(connectionString))
+                using (SqlConnection conn = new SqlConnection(connectionString))
                 {
-                    conny.Open();
-                    SqlCommand cmd = new SqlCommand("select * from accounts as a where a.user_id = @userId;", conny);
+                    conn.Open();
+                    SqlCommand cmd = new SqlCommand("select * from accounts as a where a.user_id = @userId;", conn);
                     cmd.Parameters.AddWithValue("@userId", userId);
                     SqlDataReader reader = cmd.ExecuteReader();
                     if (reader.Read())
@@ -436,32 +436,7 @@ namespace TenmoServer.DAO
             };
             return transfer;
         }
-        public void CheckUnauthorizedApproval(Transfer transfer)
-        {
-            try
-            {
-                using(SqlConnection conny = new SqlConnection(connectionString))
-                {
-                    conny.Open();
-
-                    SqlCommand cmd = new SqlCommand("select * from transfers where transfer_id = @transferId and account_to = @toUserId", conny);
-                    cmd.Parameters.AddWithValue("@transferId", transfer.TransferId);
-                    cmd.Parameters.AddWithValue("@toUserId", transfer.ToUserId);
-
-                    SqlDataReader reader = cmd.ExecuteReader();
-                    if(reader.HasRows)
-                    {
-                        conny.Close();
-                        throw new StopTryingToApproveYourRequestException();
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-
-                throw e;
-            }
-        }
+        
 
     }
 }

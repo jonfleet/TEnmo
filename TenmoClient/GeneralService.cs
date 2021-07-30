@@ -11,7 +11,7 @@ namespace TenmoClient
     {
         private readonly static string API_BASE_URL = "https://localhost:44315/";
         private readonly RestClient client = new RestClient();
-
+        
         public Balance ReturnBalance()
         {
             RestRequest request = new RestRequest(API_BASE_URL + $"user/{UserService.GetUserId()}/balance");
